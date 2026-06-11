@@ -1,0 +1,50 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07111F"/>
+      <stop offset="1" stop-color="#0D1E36"/>
+    </linearGradient>
+    <linearGradient id="cyanMagenta" x1="330" y1="140" x2="1260" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#47E7FF"/>
+      <stop offset="1" stop-color="#F64CFF"/>
+    </linearGradient>
+    <filter id="glow" x="0" y="0" width="1600" height="900" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" rx="32" fill="url(#bg)"/>
+  <circle cx="800" cy="450" r="230" fill="#0F2748" opacity="0.9"/>
+  <circle cx="800" cy="450" r="185" stroke="url(#cyanMagenta)" stroke-width="14" opacity="0.95" filter="url(#glow)"/>
+  <circle cx="800" cy="450" r="125" stroke="#7CFF9B" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="800" cy="450" r="8" fill="#7CFF9B"/>
+  <g filter="url(#glow)">
+    <circle cx="800" cy="255" r="16" fill="#47E7FF"/>
+    <circle cx="938" cy="312" r="16" fill="#47E7FF"/>
+    <circle cx="995" cy="450" r="16" fill="#47E7FF"/>
+    <circle cx="938" cy="588" r="16" fill="#F64CFF"/>
+    <circle cx="800" cy="645" r="16" fill="#F64CFF"/>
+    <circle cx="662" cy="588" r="16" fill="#F64CFF"/>
+    <circle cx="605" cy="450" r="16" fill="#47E7FF"/>
+    <circle cx="662" cy="312" r="16" fill="#47E7FF"/>
+  </g>
+  <path d="M800 450L800 255M800 450L938 312M800 450L995 450M800 450L938 588M800 450L800 645M800 450L662 588M800 450L605 450M800 450L662 312" stroke="url(#cyanMagenta)" stroke-opacity="0.4" stroke-width="2"/>
+  <text x="100" y="160" fill="#EAF6FF" font-family="Inter, Arial, sans-serif" font-size="74" font-weight="700">OctaTouch</text>
+  <text x="100" y="225" fill="#8FB0D2" font-family="Inter, Arial, sans-serif" font-size="30">Eight fingers. One universal language of touch.</text>
+  <rect x="100" y="290" width="500" height="70" rx="18" fill="#102643" stroke="#214C7D"/>
+  <text x="130" y="336" fill="#D7EDFF" font-family="Inter, Arial, sans-serif" font-size="28">Cross-platform gesture engine</text>
+  <rect x="100" y="382" width="500" height="70" rx="18" fill="#102643" stroke="#214C7D"/>
+  <text x="130" y="428" fill="#D7EDFF" font-family="Inter, Arial, sans-serif" font-size="28">Safety-aware, accessibility-first</text>
+  <rect x="100" y="474" width="500" height="70" rx="18" fill="#102643" stroke="#214C7D"/>
+  <text x="130" y="520" fill="#D7EDFF" font-family="Inter, Arial, sans-serif" font-size="28">Web demo and README-ready assets</text>
+  <rect x="1040" y="236" width="420" height="428" rx="28" fill="#0C1C31" stroke="#214C7D"/>
+  <text x="1080" y="300" fill="#EAF6FF" font-family="Inter, Arial, sans-serif" font-size="40" font-weight="700">Prototype outputs</text>
+  <text x="1080" y="360" fill="#8FB0D2" font-family="Inter, Arial, sans-serif" font-size="28">GestureResult</text>
+  <text x="1080" y="414" fill="#7CFF9B" font-family="monospace" font-size="26">type: pinch_in</text>
+  <text x="1080" y="456" fill="#7CFF9B" font-family="monospace" font-size="26">fingers: 3</text>
+  <text x="1080" y="498" fill="#7CFF9B" font-family="monospace" font-size="26">intent: copy</text>
+  <text x="1080" y="540" fill="#7CFF9B" font-family="monospace" font-size="26">blocked: false</text>
+  <text x="1080" y="582" fill="#7CFF9B" font-family="monospace" font-size="26">fallbackIntent: null</text>
+  <text x="1080" y="624" fill="#7CFF9B" font-family="monospace" font-size="26">confidence: 0.96</text>
+  <text x="100" y="820" fill="#5C7EA4" font-family="Inter, Arial, sans-serif" font-size="24">README asset · SVG</text>
+</svg>
