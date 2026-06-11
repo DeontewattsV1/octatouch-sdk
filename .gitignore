@@ -1,0 +1,43 @@
+# ── Build artifacts ──────────────────────────────────────────
+build/
+dist/
+out/
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.o
+*.obj
+
+# ── CMake generated ───────────────────────────────────────────
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# ── IDE & editors ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates
+*.code-workspace
+
+# ── OS artefacts ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── Node (web adapter / tooling) ──────────────────────────────
+node_modules/
+*.tsbuildinfo
+
+# ── Secrets & local env ───────────────────────────────────────
+.env
+.env.local
+*.pem
+secrets/
