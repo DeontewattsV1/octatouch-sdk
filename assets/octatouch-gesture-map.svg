@@ -1,0 +1,41 @@
+<svg width="1200" height="860" viewBox="0 0 1200 860" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="860" rx="28" fill="#091321"/>
+  <text x="48" y="72" fill="#EAF6FF" font-family="Inter, Arial, sans-serif" font-size="40" font-weight="700">Gesture vocabulary</text>
+  <text x="48" y="108" fill="#8FB0D2" font-family="Inter, Arial, sans-serif" font-size="22">Reference card for README usage.</text>
+  <g font-family="Inter, Arial, sans-serif" font-size="22">
+    <rect x="48" y="148" width="1104" height="80" rx="16" fill="#102643"/>
+    <text x="78" y="198" fill="#B7D7F6">Gesture</text>
+    <text x="368" y="198" fill="#B7D7F6">Intent</text>
+    <text x="760" y="198" fill="#B7D7F6">Availability</text>
+
+    <rect x="48" y="246" width="1104" height="74" rx="14" fill="#0E1D31" stroke="#19385C"/>
+    <text x="78" y="292" fill="#EAF6FF">Single tap</text>
+    <text x="368" y="292" fill="#EAF6FF">Select or confirm</text>
+    <text x="760" y="292" fill="#7CFF9B">All states</text>
+
+    <rect x="48" y="334" width="1104" height="74" rx="14" fill="#0E1D31" stroke="#19385C"/>
+    <text x="78" y="380" fill="#EAF6FF">Double tap</text>
+    <text x="368" y="380" fill="#EAF6FF">Select word</text>
+    <text x="760" y="380" fill="#7CFF9B">All states</text>
+
+    <rect x="48" y="422" width="1104" height="74" rx="14" fill="#0E1D31" stroke="#19385C"/>
+    <text x="78" y="468" fill="#EAF6FF">Triple tap</text>
+    <text x="368" y="468" fill="#EAF6FF">Select paragraph or line</text>
+    <text x="760" y="468" fill="#7CFF9B">All states</text>
+
+    <rect x="48" y="510" width="1104" height="74" rx="14" fill="#0E1D31" stroke="#19385C"/>
+    <text x="78" y="556" fill="#EAF6FF">Long press + drag</text>
+    <text x="368" y="556" fill="#EAF6FF">Select custom block</text>
+    <text x="760" y="556" fill="#7CFF9B">All states</text>
+
+    <rect x="48" y="598" width="1104" height="74" rx="14" fill="#0E1D31" stroke="#19385C"/>
+    <text x="78" y="644" fill="#EAF6FF">Two-finger tap</text>
+    <text x="368" y="644" fill="#EAF6FF">Save highlight</text>
+    <text x="760" y="644" fill="#47E7FF">Parked / non-vehicle</text>
+
+    <rect x="48" y="686" width="1104" height="74" rx="14" fill="#0E1D31" stroke="#19385C"/>
+    <text x="78" y="732" fill="#EAF6FF">Three-finger pinch in/out</text>
+    <text x="368" y="732" fill="#EAF6FF">Copy / Paste</text>
+    <text x="760" y="732" fill="#47E7FF">Parked / non-vehicle</text>
+  </g>
+</svg>
