@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OctaTouch Demo Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">OctaTouch demo prototype</p>
+          <h1>Universal gesture engine demo for GitHub Pages and README assets.</h1>
+          <p class="lede">Use touch on mobile, or use the simulator buttons on desktop. The result envelope mirrors the normalized OctaTouch output model and now includes per-finger long-press recognition printouts.</p>
+        </div>
+        <div class="heroBadge">8 finger channels · safety aware · accessibility first</div>
+      </header>
+
+      <section class="grid">
+        <aside class="panel controls">
+          <h2>State</h2>
+          <label class="toggle"><input type="checkbox" id="drivingMode" /> <span>Driving mode</span></label>
+          <label class="toggle"><input type="checkbox" id="respectAccessibility" checked /> <span>Respect accessibility gestures</span></label>
+          <label class="toggle"><input type="checkbox" id="limitedHardware" /> <span>Limited hardware mode</span></label>
+          <label class="toggle"><input type="checkbox" id="showHints" checked /> <span>Show hints</span></label>
+
+          <div class="divider"></div>
+
+          <h2>Desktop simulator</h2>
+          <div class="simButtons">
+            <button data-sim="single_tap">Single tap</button>
+            <button data-sim="double_tap">Double tap</button>
+            <button data-sim="triple_tap">Triple tap</button>
+            <button data-sim="swipe_left">Swipe left</button>
+            <button data-sim="swipe_right">Swipe right</button>
+            <button data-sim="two_finger_tap">Two-finger tap</button>
+            <button data-sim="three_finger_pinch_in">3-finger pinch in</button>
+            <button data-sim="three_finger_pinch_out">3-finger pinch out</button>
+            <button data-sim="three_finger_swipe_left">3-finger swipe left</button>
+            <button data-sim="three_finger_swipe_right">3-finger swipe right</button>
+            <button data-sim="three_finger_tap">3-finger tap</button>
+            <button data-sim="long_press_drag">Long press + drag</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <h2>Per-finger long press</h2>
+          <div class="simButtons longPressGrid">
+            <button data-sim="finger_1_long_press">Finger 1 long press</button>
+            <button data-sim="finger_2_long_press">Finger 2 long press</button>
+            <button data-sim="finger_3_long_press">Finger 3 long press</button>
+            <button data-sim="finger_4_long_press">Finger 4 long press</button>
+            <button data-sim="finger_5_long_press">Finger 5 long press</button>
+            <button data-sim="finger_6_long_press">Finger 6 long press</button>
+            <button data-sim="finger_7_long_press">Finger 7 long press</button>
+            <button data-sim="finger_8_long_press">Finger 8 long press</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <h2>Hints</h2>
+          <ul class="hints" id="hintList">
+            <li>On touch devices, try one-finger taps, long presses, and swipes directly on the touch surface.</li>
+            <li>For multi-finger actions or exact finger-channel demos on desktop, use the simulator buttons.</li>
+            <li>Finger long presses print a recognition label and the resolved channel in the output panels.</li>
+            <li>Enable driving mode to see complex gestures blocked.</li>
+          </ul>
+        </aside>
+
+        <main class="panel workspace">
+          <div class="workspaceHeader">
+            <div>
+              <h2>Touch surface</h2>
+              <p>Pointer and simulator events both resolve into a shared result envelope.</p>
+            </div>
+            <div class="statusPills">
+              <span class="pill" id="modePill">Parked</span>
+              <span class="pill" id="accessibilityPill">A11y respect on</span>
+            </div>
+          </div>
+
+          <div class="banner" id="banner">Ready.</div>
+
+          <div class="touchSurface" id="touchSurface">
+            <div class="surfaceGrid"></div>
+            <div class="surfaceCenter">Touch or simulate</div>
+          </div>
+
+          <div class="resultLayout">
+            <section class="card">
+              <h3>GestureResult</h3>
+              <pre id="resultJson">{
+  "type": null,
+  "fingers": 0,
+  "intent": null,
+  "fallbackIntent": null,
+  "blocked": false,
+  "confidence": 0,
+  "recognizedChannels": [],
+  "recognitionLabel": null,
+  "userMessage": "Ready"
+}</pre>
+            </section>
+            <section class="card">
+              <h3>Recognition printout</h3>
+              <pre id="recognitionPrint">Ready</pre>
+            </section>
+            <section class="card">
+              <h3>Recent events</h3>
+              <ol id="eventLog" class="eventLog"></ol>
+            </section>
+          </div>
+        </main>
+      </section>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>
