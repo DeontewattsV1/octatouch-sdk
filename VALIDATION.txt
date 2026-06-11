@@ -1,0 +1,13 @@
+Validated on 2026-03-22
+
+C++:
+- cmake -S . -B build
+- cmake --build build -j4
+- ./build/octatouch_smoke_test
+- ./build/octatouch_native_runtime_test
+- ./build/intent_policy_test
+- ./build/canbus_monitor_test
+
+JS runtime:
+- node tests/runtime/expo_runtime_smoke.mjs
+- node tests/runtime/expo_policy_runtime_smoke.mjs
