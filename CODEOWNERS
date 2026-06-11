@@ -1,0 +1,9 @@
+# CODEOWNERS — all paths default to core maintainer review
+
+* @deontewatts
+
+# Safety-critical surfaces — extra sign-off required
+core/                                    @deontewatts
+integrations/in-vehicle-hmi/             @deontewatts
+integrations/firmware-ad7879/            @deontewatts
+apps/expo-demo/modules/octatouch-native/ @deontewatts
