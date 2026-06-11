@@ -1,0 +1,1162 @@
+import { useState, useMemo, useEffect, useCallback } from "react";
+
+/* ── DESIGN TOKENS ─────────────────────────────────────────────────────── */
+const D = {
+  bg:      "#04090f",
+  bg2:     "#07101a",
+  surface: "#0b1828",
+  card:    "#0e1e30",
+  border:  "#172840",
+  accent:  "#00e5b0",
+  accentLo:"rgba(0,229,176,0.12)",
+  blue:    "#1a78ff",
+  blueLo:  "rgba(26,120,255,0.12)",
+  text:    "#dce9ff",
+  muted:   "#3d5a7a",
+  dim:     "#132030",
+  red:     "#ff4060",
+  amber:   "#ffa030",
+  purple:  "#b060ff",
+  teal:    "#20d0e0",
+  font:    "'Space Mono', monospace",
+  body:    "'Outfit', sans-serif",
+};
+
+/* ── SEED DATA ─────────────────────────────────────────────────────────── */
+const SEED = [
+  {
+    id:"octatouch", type:"project", title:"OctaTouch™ Universal Gesture Engine",
+    slug:"octatouch",
+    summary:"Cross-platform C++17 SDK standardizing an eight-finger gesture language across OS, hardware targets, and automotive infotainment. 16ms latency budget. Platform adapters for iOS, Android, Windows, Linux, Web, Unity, and Unreal Engine.",
+    tags:["C++17","SDK","Cross-Platform","HCI","Automotive","WASM"],
+    stack:["C++17","CMake","iOS","Android","Windows","Linux","Unity","Unreal"],
+    status:"published", featured:true, category:"Systems Engineering", language:"C++",
+    links:[{label:"GitHub",url:"https://github.com/deontewatts/octatouch-sdk-core",type:"github"}],
+    media:[], createdAt:"2024-11-01", updatedAt:"2025-03-01",
+  },
+  {
+    id:"aeon-sentinel", type:"project", title:"AEON Sentinel — Sovereign Intelligence",
+    slug:"aeon-sentinel",
+    summary:"Python/FastAPI sovereign intelligence system for high-stakes architectures. Dialectical computation with Borromean ring topology, adversarial Socratic falsification engine, and Epistemic Kill-Switch. Docker + GitHub Actions CI.",
+    tags:["Python","FastAPI","Docker","AI Safety","Ethics","Distributed"],
+    stack:["Python","FastAPI","Docker","GitHub Actions","Pydantic","YAML"],
+    status:"published", featured:true, category:"AI Infrastructure", language:"Python",
+    links:[{label:"GitHub",url:"https://github.com/deontewatts/aeon-sentinel",type:"github"}],
+    media:[], createdAt:"2024-10-01", updatedAt:"2025-03-01",
+  },
+  {
+    id:"ref-engine", type:"repository", title:"ref-engine — Recognitive Equation Framework",
+    slug:"ref-engine",
+    summary:"Python CLI scoring documents RECOGNITIVE, NEUTRAL, or MANIPULATIVE via quaternion model Ψ ∈ ℍ⁴. Ten modules, corpus differential analysis, trajectory rendering, HTML reports. CI via GitHub Actions.",
+    tags:["Python","NLP","Quaternion","CLI","Analytics","AEON"],
+    stack:["Python","NumPy","SciPy","pypdf","rich"],
+    status:"published", featured:true, category:"Analysis Tools", language:"Python",
+    links:[{label:"GitHub",url:"https://github.com/deontewatts/ref-engine",type:"github"}],
+    media:[], createdAt:"2025-01-01", updatedAt:"2025-03-15",
+  },
+  {
+    id:"norcal-volley", type:"project", title:"NorCal Volley Intel — Auto-Publish Pipeline",
+    slug:"norcal-volley",
+    summary:"Six-stage auto-publish Instagram Reel pipeline: Claude API → Canva/StabilityAI → ElevenLabs → FFmpeg → Meta Graph API. Targeting Oracle Cloud free-tier infrastructure with webhook-triggered CI.",
+    tags:["Python","Claude API","ElevenLabs","Meta Graph","Video","Automation"],
+    stack:["Python","Claude API","Canva","ElevenLabs","FFmpeg","Oracle Cloud"],
+    status:"published", featured:false, category:"Automation", language:"Python",
+    links:[], media:[], createdAt:"2024-09-01", updatedAt:"2025-02-01",
+  },
+  {
+    id:"ethos-aegis", type:"repository", title:"Ethos Aegis — Sovereign AI Immune System",
+    slug:"ethos-aegis",
+    summary:"Dynamic AI security mesh on a biological immune paradigm. Sentinel cells patrol data streams: VanguardProbe (Neutrophil), LogosScythe (T-Lymphocyte), MnemosyneCache (B-Lymphocyte). Self-regulating, self-healing architecture.",
+    tags:["Python","AI Safety","Security","Ethics","Biological Paradigm"],
+    stack:["Python","FastAPI","Docker"],
+    status:"published", featured:false, category:"AI Security", language:"Python",
+    links:[{label:"GitHub",url:"https://github.com/deontewatts/the-ethos-aegis",type:"github"}],
+    media:[], createdAt:"2024-08-01", updatedAt:"2025-01-01",
+  },
+  {
+    id:"architects-manifesto", type:"research", title:"The Architect's Manifesto — Human-AI Symbiosis",
+    slug:"architects-manifesto",
+    summary:"Foundational philosophical framework for human-AI symbiosis via four quantifiable metrics: ECTI (ethics-as-architecture fidelity >99%), CSM (cognitive symbiosis, not replacement), STL (transparency latency <100ms), KAQ (composable kinship quotient).",
+    tags:["Philosophy","AI Ethics","Human-AI","Systems Theory","Manifesto"],
+    stack:[], status:"published", featured:true, category:"Philosophy & Theory", language:null,
+    links:[], media:[], createdAt:"2024-06-01", updatedAt:"2025-03-01",
+  },
+  {
+    id:"cognitive-fidelity", type:"research", title:"Cognitive Fidelity Dynamics",
+    slug:"cognitive-fidelity",
+    summary:"Formalizing consciousness via Quaternion Process Theory. Mental states as four-dimensional quaternion fields — Ψ = ψ₀ + ψ₁i + ψ₂j + ψ₃k. Governing equation: ∂Ψ/∂t = α∇Ψ + β(Ψ×Ψ*) + γΦ_ext. Ethical Fidelity Index ℰ.",
+    tags:["Quaternion","Consciousness","Mathematics","Cognitive Science","Ethical AI"],
+    stack:[], status:"published", featured:false, category:"Mathematics & Cognition", language:null,
+    links:[], media:[], createdAt:"2025-01-15", updatedAt:"2025-02-01",
+  },
+  {
+    id:"resume-optimizer", type:"experiment", title:"Resume BAOptimizer",
+    slug:"resume-optimizer",
+    summary:"React-based resume optimizer pre-loaded with verified career dataset optimized for SF Bay Area Craigslist applications. Covers BOH kitchen, FOH, Supervisor, and Private Chef lanes.",
+    tags:["React","TypeScript","Bay Area","Career","Tailwind"],
+    stack:["React","TypeScript","Tailwind"],
+    status:"published", featured:false, category:"Tools", language:"TypeScript",
+    links:[], media:[], createdAt:"2024-12-01", updatedAt:"2025-01-15",
+  },
+  {
+    id:"reprally", type:"project", title:"RepRally",
+    slug:"reprally",
+    summary:"Active project within the Deonte Watts ecosystem. Part of the composable AI infrastructure stack. Details forthcoming — add via ingest.",
+    tags:["AI","Composable","Active"],
+    stack:[], status:"draft", featured:false, category:"Active Projects", language:null,
+    links:[], media:[], createdAt:"2025-02-01", updatedAt:"2025-03-01",
+  },
+  {
+    id:"dev-hq", type:"development", title:"Developer HQ — Innovation Command Center",
+    slug:"dev-hq",
+    summary:"Personal innovation command center: Next.js App Router, auto-classification ingest pipeline, structured content library, embed manager. Content schema driven, agent-native, composable across the full project ecosystem.",
+    tags:["Next.js","TypeScript","React","Portfolio","Dashboard","Agent-Native"],
+    stack:["Next.js","TypeScript","Tailwind","Prisma"],
+    status:"published", featured:false, category:"Infrastructure", language:"TypeScript",
+    links:[], media:[], createdAt:"2025-03-01", updatedAt:"2025-03-23",
+  },
+];
+
+/* ── TYPE CONFIG ───────────────────────────────────────────────────────── */
+const TC = {
+  project:     { bg:"rgba(0,229,176,0.1)",   border:"#00e5b0", text:"#00e5b0",  icon:"⬡" },
+  repository:  { bg:"rgba(26,120,255,0.1)",  border:"#1a78ff", text:"#1a78ff",  icon:"⊞" },
+  research:    { bg:"rgba(176,96,255,0.1)",  border:"#b060ff", text:"#b060ff",  icon:"∿" },
+  development: { bg:"rgba(255,160,48,0.1)",  border:"#ffa030", text:"#ffa030",  icon:"⊕" },
+  experiment:  { bg:"rgba(255,64,96,0.1)",   border:"#ff4060", text:"#ff4060",  icon:"◈" },
+  writing:     { bg:"rgba(32,208,224,0.1)",  border:"#20d0e0", text:"#20d0e0",  icon:"≡" },
+  embed:       { bg:"rgba(100,220,140,0.1)", border:"#64dc8c", text:"#64dc8c",  icon:"⊻" },
+  custom:      { bg:"rgba(100,140,180,0.1)", border:"#6488b0", text:"#6488b0",  icon:"◇" },
+};
+
+const NAV = [
+  { id:"home",         label:"Home",         icon:"⌂" },
+  { id:"projects",     label:"Projects",     icon:"⬡" },
+  { id:"repositories", label:"Repositories", icon:"⊞" },
+  { id:"research",     label:"Research",     icon:"∿" },
+  { id:"developments", label:"Developments", icon:"⊕" },
+  { id:"experiments",  label:"Experiments",  icon:"◈" },
+  { id:"embeds",       label:"Embeds",       icon:"⊻" },
+  { id:"about",        label:"About",        icon:"∂" },
+  { id:"---" },
+  { id:"dashboard",    label:"Dashboard",    icon:"◫" },
+  { id:"ingest",       label:"Ingest",       icon:"⊹" },
+];
+
+const PAGE_TYPE = {
+  projects:"project", repositories:"repository",
+  research:"research", developments:"development", experiments:"experiment",
+};
+
+/* ── CLASSIFIER ────────────────────────────────────────────────────────── */
+function classify(raw) {
+  const t = raw.toLowerCase();
+  if (/github\.com|\.git\b|repository|git clone/.test(t))       return "repository";
+  if (/abstract|hypothesis|theorem|quaternion|ψ|∈\s*ℍ/.test(t)) return "research";
+  if (/<iframe|youtube\.com|vimeo\.com|\bembed\b/.test(t))       return "embed";
+  if (/\bexperiment\b|prototype|\bpoc\b|proof of concept/.test(t)) return "experiment";
+  if (/changelog|progress|shipped|milestone|sprint/.test(t))     return "development";
+  if (/\bblog\b|essay|\barticle\b|chapter/.test(t))              return "writing";
+  if (/def |class |import |function |const |export /.test(t))    return "project";
+  return "project";
+}
+
+function autoTags(raw) {
+  const checks = [
+    ["Python",     /\bpython\b|\.py\b|def \w+|import \w+/i],
+    ["TypeScript", /typescript|\.tsx?\b|interface \w+/i],
+    ["JavaScript", /javascript|\.js\b|const |let |=>/.test(raw) && !/typescript/i.test(raw)],
+    ["C++",        /c\+\+|\.cpp\b|std::|template</i],
+    ["React",      /\breact\b|useState|useEffect|jsx/i],
+    ["Docker",     /\bdocker\b|dockerfile|container/i],
+    ["API",        /\bapi\b|endpoint|fastapi|flask|route/i],
+    ["AI/ML",      /\bai\b|llm|gpt|claude|anthropic|machine learn/i],
+    ["SDK",        /\bsdk\b|\blibrary\b|\bframework\b/i],
+    ["Next.js",    /next\.js|nextjs|app router/i],
+  ];
+  return checks.filter(([,pat]) => pat instanceof RegExp ? pat.test(raw) : pat).map(([k]) => k).slice(0,5);
+}
+
+function makeItem(raw, title) {
+  const type = classify(raw);
+  const now = new Date().toISOString();
+  const t = title || raw.slice(0,60).replace(/\n/g," ").trim() || "Untitled";
+  const slug = t.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const tags = autoTags(raw);
+  return {
+    id: `item-${Date.now()}`,
+    type, title:t, slug,
+    summary: raw.slice(0,240).replace(/\n/g," ").trim(),
+    tags, stack: tags.filter(t=>["Python","TypeScript","JavaScript","C++","React","Docker"].includes(t)),
+    status:"draft", featured:false, category:"", language:null,
+    links:[], media:[], createdAt:now, updatedAt:now,
+  };
+}
+
+/* ── FONT LOADER ───────────────────────────────────────────────────────── */
+function Fonts() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+      html,body{background:${D.bg};color:${D.text};font-family:${D.body};}
+      ::selection{background:${D.accentLo};color:${D.accent};}
+      ::-webkit-scrollbar{width:4px;height:4px;}
+      ::-webkit-scrollbar-track{background:${D.bg2};}
+      ::-webkit-scrollbar-thumb{background:${D.border};border-radius:2px;}
+      ::-webkit-scrollbar-thumb:hover{background:${D.accent};}
+      @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+      @keyframes pulseGlow{0%,100%{opacity:1;}50%{opacity:0.3;}}
+      @keyframes slideIn{from{opacity:0;transform:scale(0.97);}to{opacity:1;transform:scale(1);}}
+      .fu{animation:fadeUp 0.35s ease both;}
+      .fu1{animation:fadeUp 0.35s 0.05s ease both;}
+      .fu2{animation:fadeUp 0.35s 0.1s ease both;}
+      .fu3{animation:fadeUp 0.35s 0.15s ease both;}
+      .fu4{animation:fadeUp 0.35s 0.2s ease both;}
+      .ch{transition:all 0.18s ease;cursor:pointer;}
+      .ch:hover{border-color:${D.accent}!important;box-shadow:0 6px 24px rgba(0,229,176,0.12);transform:translateY(-1px);}
+      .btn{transition:all 0.15s ease;cursor:pointer;border:none;}
+      .btn:active{transform:scale(0.97);}
+      input,textarea,select{font-family:${D.body};background:${D.surface};border:1px solid ${D.border};color:${D.text};outline:none;border-radius:6px;}
+      input:focus,textarea:focus{border-color:${D.accent}55!important;}
+      option{background:${D.surface};}
+    `}</style>
+  );
+}
+
+/* ── GRID BG ───────────────────────────────────────────────────────────── */
+function GridBg() {
+  return (
+    <div style={{
+      position:"fixed",inset:0,zIndex:0,pointerEvents:"none",
+      backgroundImage:`
+        radial-gradient(ellipse 60% 50% at 15% 15%, rgba(0,229,176,0.04) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 85% 85%, rgba(26,120,255,0.04) 0%, transparent 70%),
+        linear-gradient(${D.border}55 1px, transparent 1px),
+        linear-gradient(90deg, ${D.border}55 1px, transparent 1px)
+      `,
+      backgroundSize:"100% 100%,100% 100%,56px 56px,56px 56px",
+    }}/>
+  );
+}
+
+/* ── TYPE BADGE ────────────────────────────────────────────────────────── */
+function TBadge({type}) {
+  const c = TC[type]||TC.custom;
+  return (
+    <span style={{
+      background:c.bg, border:`1px solid ${c.border}44`,
+      color:c.text, fontSize:9, padding:"2px 8px", borderRadius:2,
+      fontFamily:D.font, letterSpacing:"0.1em", textTransform:"uppercase",
+    }}>
+      {c.icon} {type}
+    </span>
+  );
+}
+
+/* ── TAG PILL ──────────────────────────────────────────────────────────── */
+function Chip({label}) {
+  return (
+    <span style={{
+      background:D.dim, color:D.muted, fontSize:10,
+      padding:"2px 8px", borderRadius:2, fontFamily:D.font,
+    }}>{label}</span>
+  );
+}
+
+/* ── CONTENT CARD ──────────────────────────────────────────────────────── */
+function Card({item, onClick}) {
+  const c = TC[item.type]||TC.custom;
+  return (
+    <div className="ch" onClick={()=>onClick(item)} style={{
+      background:D.card, border:`1px solid ${D.border}`,
+      borderLeft:`3px solid ${c.border}`, borderRadius:8,
+      padding:"20px 22px",
+    }}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+        <TBadge type={item.type}/>
+        {item.featured && <span style={{color:D.accent,fontSize:9,fontFamily:D.font}}>★ FEATURED</span>}
+      </div>
+      <h3 style={{fontFamily:D.font,fontSize:13,fontWeight:700,color:D.text,marginBottom:8,lineHeight:1.45}}>{item.title}</h3>
+      <p style={{color:D.muted,fontSize:12,lineHeight:1.7,marginBottom:14}}>
+        {item.summary.slice(0,160)}{item.summary.length>160?"…":""}
+      </p>
+      <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:item.stack.length?10:0}}>
+        {item.tags.slice(0,4).map(t=><Chip key={t} label={t}/>)}
+      </div>
+      {item.stack.length>0&&(
+        <div style={{fontSize:10,color:`${D.muted}99`,fontFamily:D.font,letterSpacing:"0.04em"}}>
+          {item.stack.slice(0,4).join(" · ")}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── DETAIL MODAL ──────────────────────────────────────────────────────── */
+function Detail({item, onClose}) {
+  if(!item) return null;
+  const c = TC[item.type]||TC.custom;
+  return (
+    <div onClick={onClose} style={{
+      position:"fixed",inset:0,background:"rgba(4,9,15,0.88)",
+      zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",
+      backdropFilter:"blur(10px)",
+    }}>
+      <div onClick={e=>e.stopPropagation()} style={{
+        background:D.surface, border:`1px solid ${D.border}`,
+        borderTop:`2px solid ${c.border}`, borderRadius:10,
+        padding:36, maxWidth:680, width:"90%", maxHeight:"80vh",
+        overflowY:"auto", animation:"slideIn 0.22s ease",
+      }}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
+          <TBadge type={item.type}/>
+          <button onClick={onClose} className="btn" style={{
+            background:"none",color:D.muted,fontSize:18,lineHeight:1,
+          }}>✕</button>
+        </div>
+        <h2 style={{fontFamily:D.font,fontSize:18,fontWeight:700,color:D.text,marginBottom:14,lineHeight:1.4}}>
+          {item.title}
+        </h2>
+        <p style={{color:D.muted,fontSize:13,lineHeight:1.85,marginBottom:22}}>
+          {item.summary}
+        </p>
+
+        {item.stack.length>0&&(
+          <div style={{marginBottom:18}}>
+            <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.12em",marginBottom:8}}>TECH STACK</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {item.stack.map(s=>(
+                <span key={s} style={{
+                  background:c.bg,border:`1px solid ${c.border}44`,
+                  color:c.text,fontSize:11,padding:"3px 10px",
+                  borderRadius:3,fontFamily:D.font,
+                }}>{s}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {item.tags.length>0&&(
+          <div style={{marginBottom:22}}>
+            <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.12em",marginBottom:8}}>TAGS</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {item.tags.map(t=><Chip key={t} label={t}/>)}
+            </div>
+          </div>
+        )}
+
+        {item.links.length>0&&(
+          <div style={{marginBottom:22}}>
+            <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.12em",marginBottom:10}}>LINKS</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {item.links.map(l=>(
+                <a key={l.url} href={l.url} target="_blank" rel="noreferrer" style={{
+                  padding:"8px 16px",background:D.dim,color:D.text,
+                  textDecoration:"none",borderRadius:6,fontSize:12,
+                  fontFamily:D.font,border:`1px solid ${D.border}`,letterSpacing:"0.05em",
+                }}>
+                  ⊞ {l.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {item.category&&(
+          <div style={{fontSize:11,color:D.muted,fontFamily:D.font,marginBottom:4}}>
+            Category: {item.category}
+          </div>
+        )}
+        <div style={{
+          paddingTop:16,marginTop:8,borderTop:`1px solid ${D.border}`,
+          fontSize:10,color:`${D.muted}88`,fontFamily:D.font,letterSpacing:"0.06em",
+          display:"flex",gap:16,
+        }}>
+          <span>CREATED {new Date(item.createdAt).toLocaleDateString()}</span>
+          <span>STATUS {item.status.toUpperCase()}</span>
+          {item.language&&<span>LANG {item.language.toUpperCase()}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── SIDEBAR ───────────────────────────────────────────────────────────── */
+function Sidebar({page, setPage}) {
+  return (
+    <nav style={{
+      width:214, minHeight:"100vh", background:`${D.bg2}ee`,
+      borderRight:`1px solid ${D.border}`,
+      display:"flex",flexDirection:"column",
+      position:"fixed",left:0,top:0,bottom:0,zIndex:100,
+    }}>
+      <div style={{padding:"26px 22px 18px",borderBottom:`1px solid ${D.dim}`}}>
+        <div style={{fontFamily:D.font,fontSize:16,fontWeight:700,color:D.accent,letterSpacing:"0.06em",marginBottom:2}}>
+          DW·HQ
+        </div>
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.15em"}}>
+          DEONTE WATTS
+        </div>
+        <div style={{
+          display:"inline-flex",alignItems:"center",gap:5,
+          marginTop:10,padding:"4px 10px",
+          background:D.accentLo,border:`1px solid ${D.accent}30`,
+          borderRadius:3,
+        }}>
+          <span style={{width:5,height:5,background:D.accent,borderRadius:"50%",
+            animation:"pulseGlow 1.8s infinite"}}/>
+          <span style={{fontFamily:D.font,fontSize:8,color:D.accent,letterSpacing:"0.12em"}}>
+            LIVE
+          </span>
+        </div>
+      </div>
+
+      <div style={{flex:1,padding:"12px 0",overflowY:"auto"}}>
+        {NAV.map((item,i)=>{
+          if(item.id==="---") return <div key={i} style={{height:1,background:D.dim,margin:"8px 14px"}}/>;
+          const active = page===item.id;
+          return (
+            <button key={item.id} onClick={()=>setPage(item.id)} className="btn" style={{
+              display:"flex",alignItems:"center",gap:10,
+              width:"100%",padding:"9px 22px",
+              background:active?`${D.accent}12`:"transparent",
+              borderLeft:`2px solid ${active?D.accent:"transparent"}`,
+              color:active?D.accent:D.muted,
+              fontFamily:D.font,fontSize:11,letterSpacing:"0.06em",
+              cursor:"pointer",textAlign:"left",
+              transition:"all 0.15s",
+            }}>
+              <span style={{fontSize:13}}>{item.icon}</span>
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{padding:"14px 22px",borderTop:`1px solid ${D.dim}`}}>
+        <div style={{fontFamily:D.font,fontSize:9,color:`${D.muted}88`,letterSpacing:"0.1em",lineHeight:1.8}}>
+          Ψ ∈ ℍ⁴<br/>
+          CCE HOSPITALITY GROUP<br/>
+          SAN FRANCISCO · CA
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+/* ── TOP BAR ───────────────────────────────────────────────────────────── */
+function TopBar({search, setSearch, typeFilter, setTypeFilter, onIngest, title}) {
+  return (
+    <div style={{
+      display:"flex",alignItems:"center",gap:10,
+      padding:"12px 28px",borderBottom:`1px solid ${D.border}`,
+      position:"sticky",top:0,background:`${D.bg}ee`,zIndex:50,
+      backdropFilter:"blur(16px)",
+    }}>
+      {title&&(
+        <span style={{fontFamily:D.font,fontSize:12,color:D.muted,letterSpacing:"0.06em",marginRight:4}}>
+          ── {title}
+        </span>
+      )}
+      <div style={{flex:1,position:"relative",minWidth:0}}>
+        <span style={{position:"absolute",left:11,top:"50%",transform:"translateY(-50%)",color:D.muted,fontSize:13,pointerEvents:"none"}}>⌕</span>
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="Search by title, tag, stack, keyword..."
+          style={{width:"100%",padding:"8px 12px 8px 32px",fontSize:12,borderRadius:6}}
+        />
+      </div>
+      <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)}
+        style={{padding:"8px 12px",fontSize:11,borderRadius:6,fontFamily:D.font,cursor:"pointer",minWidth:120}}>
+        <option value="all">ALL TYPES</option>
+        {Object.keys(TC).map(t=><option key={t} value={t}>{t.toUpperCase()}</option>)}
+      </select>
+      <button onClick={onIngest} className="btn" style={{
+        padding:"8px 16px",background:D.accent,color:D.bg,
+        borderRadius:6,fontFamily:D.font,fontSize:11,fontWeight:700,
+        letterSpacing:"0.08em",whiteSpace:"nowrap",
+      }}>
+        ⊹ INGEST
+      </button>
+    </div>
+  );
+}
+
+/* ── HOME PAGE ─────────────────────────────────────────────────────────── */
+function HomePage({items, setPage, onSelect}) {
+  const featured = items.filter(i=>i.featured).slice(0,3);
+  const recent   = items.slice(0,6);
+  const counts   = {
+    total:       items.length,
+    projects:    items.filter(i=>i.type==="project").length,
+    repos:       items.filter(i=>i.type==="repository").length,
+    research:    items.filter(i=>i.type==="research").length,
+    active:      items.filter(i=>i.status==="published").length,
+  };
+
+  return (
+    <div style={{padding:"44px 28px 60px"}}>
+      {/* Hero */}
+      <div className="fu" style={{marginBottom:52}}>
+        <div style={{fontFamily:D.font,fontSize:10,color:D.accent,letterSpacing:"0.22em",marginBottom:14}}>
+          INNOVATION COMMAND CENTER · ACTIVE
+        </div>
+        <h1 style={{fontFamily:D.font,fontSize:52,fontWeight:700,lineHeight:1.05,marginBottom:18,maxWidth:560}}>
+          <span style={{color:D.text}}>DEONTE</span><br/>
+          <span style={{
+            background:`linear-gradient(90deg, ${D.accent}, ${D.blue})`,
+            WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",
+          }}>WATTS</span>
+        </h1>
+        <p style={{color:D.muted,fontSize:15,lineHeight:1.8,maxWidth:500,fontFamily:D.body,marginBottom:28}}>
+          Symbiotic Architect at the convergence of hospitality, AI engineering,
+          and ethical computational design. Building systems that feel humane
+          and function with moral precision.
+        </p>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <button onClick={()=>setPage("projects")} className="btn" style={{
+            padding:"11px 22px",background:D.accent,color:D.bg,
+            borderRadius:6,fontFamily:D.font,fontSize:11,fontWeight:700,letterSpacing:"0.1em",
+          }}>VIEW PROJECTS →</button>
+          <button onClick={()=>setPage("ingest")} className="btn" style={{
+            padding:"11px 22px",background:"transparent",
+            border:`1px solid ${D.border}`,color:D.text,
+            borderRadius:6,fontFamily:D.font,fontSize:11,letterSpacing:"0.08em",
+          }}>⊹ ADD CONTENT</button>
+          <button onClick={()=>setPage("about")} className="btn" style={{
+            padding:"11px 22px",background:"transparent",
+            border:`1px solid ${D.border}`,color:D.muted,
+            borderRadius:6,fontFamily:D.font,fontSize:11,letterSpacing:"0.08em",
+          }}>ABOUT</button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="fu1" style={{
+        display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:44,
+      }}>
+        {[
+          ["ITEMS",counts.total,D.accent],
+          ["PROJECTS",counts.projects,"#00e5b0"],
+          ["REPOS",counts.repos,"#1a78ff"],
+          ["RESEARCH",counts.research,"#b060ff"],
+          ["PUBLISHED",counts.active,"#ffa030"],
+        ].map(([l,v,c])=>(
+          <div key={l} style={{
+            background:D.card,border:`1px solid ${D.border}`,
+            borderRadius:8,padding:"16px 18px",
+          }}>
+            <div style={{fontFamily:D.font,fontSize:26,fontWeight:700,color:c}}>{v}</div>
+            <div style={{fontFamily:D.font,fontSize:8,color:D.muted,letterSpacing:"0.12em",marginTop:3}}>{l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Ecosystem tags */}
+      <div className="fu2" style={{marginBottom:44}}>
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:14}}>
+          ── ACTIVE ECOSYSTEM
+        </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+          {["OctaTouch™","AEON Sentinel","REF Engine","NorCal Volley Intel","RepRally","Ethos Aegis","Architect's Manifesto"].map(p=>(
+            <span key={p} style={{
+              background:D.dim,border:`1px solid ${D.border}`,
+              color:D.muted,fontSize:11,padding:"5px 12px",borderRadius:3,fontFamily:D.font,
+            }}>{p}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Featured */}
+      {featured.length>0&&(
+        <div className="fu3" style={{marginBottom:44}}>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:16}}>
+            ── FEATURED WORK ({featured.length})
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
+            {featured.map(item=><Card key={item.id} item={item} onClick={onSelect}/>)}
+          </div>
+        </div>
+      )}
+
+      {/* Recent */}
+      <div className="fu4">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em"}}>
+            ── ALL CONTENT ({recent.length}+)
+          </div>
+          <button onClick={()=>setPage("dashboard")} className="btn" style={{
+            fontFamily:D.font,fontSize:10,color:D.accent,
+            background:"none",letterSpacing:"0.08em",
+          }}>VIEW ALL →</button>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
+          {recent.map(item=><Card key={item.id} item={item} onClick={onSelect}/>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── CONTENT PAGE ──────────────────────────────────────────────────────── */
+function ContentPage({title, type, items, onSelect}) {
+  const list = type==="all" ? items : items.filter(i=>i.type===type);
+  const c = TC[type]||TC.project;
+  return (
+    <div style={{padding:"40px 28px 60px"}}>
+      <div className="fu" style={{marginBottom:28}}>
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:8}}>
+          ── {title?.toUpperCase()}
+        </div>
+        <div style={{display:"flex",alignItems:"baseline",gap:12}}>
+          <h2 style={{fontFamily:D.font,fontSize:28,fontWeight:700,color:D.text}}>{title}</h2>
+          <span style={{fontFamily:D.font,fontSize:12,color:c.text}}>({list.length})</span>
+        </div>
+      </div>
+      {list.length===0 ? (
+        <div style={{
+          textAlign:"center",padding:"80px 0",color:D.muted,
+          fontFamily:D.font,fontSize:11,letterSpacing:"0.1em",
+        }}>
+          <div style={{fontSize:32,marginBottom:12}}>{c.icon}</div>
+          NO {title?.toUpperCase()} YET — USE ⊹ INGEST TO ADD
+        </div>
+      ) : (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:12}}>
+          {list.map(item=><Card key={item.id} item={item} onClick={onSelect}/>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── INGEST PAGE ───────────────────────────────────────────────────────── */
+function IngestPage({onAdd, setPage}) {
+  const [mode, setMode]     = useState("paste");
+  const [text, setText]     = useState("");
+  const [url, setUrl]       = useState("");
+  const [title, setTitle]   = useState("");
+  const [preview, setPreview] = useState(null);
+  const [done, setDone]     = useState(false);
+
+  const raw = text || url;
+
+  useEffect(()=>{
+    if(raw.length>20) setPreview(makeItem(raw, title));
+    else setPreview(null);
+  }, [raw, title]);
+
+  function submit() {
+    if(!raw.trim()) return;
+    onAdd(makeItem(raw, title));
+    setDone(true);
+    setTimeout(()=>{
+      setDone(false); setText(""); setUrl(""); setTitle(""); setPreview(null);
+      setPage("dashboard");
+    }, 1400);
+  }
+
+  return (
+    <div style={{padding:"40px 28px 60px",maxWidth:780}}>
+      <div className="fu" style={{marginBottom:36}}>
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:8}}>
+          ── CONTENT INGEST
+        </div>
+        <h2 style={{fontFamily:D.font,fontSize:26,fontWeight:700,color:D.text,marginBottom:10}}>
+          Add to Library
+        </h2>
+        <p style={{color:D.muted,fontSize:13,lineHeight:1.8,fontFamily:D.body}}>
+          Paste text, code, research, README, or a repository URL. Auto-classification
+          detects type, extracts tags, and structures the entry immediately.
+        </p>
+      </div>
+
+      {/* Mode */}
+      <div style={{display:"flex",gap:8,marginBottom:20}}>
+        {[{id:"paste",label:"PASTE TEXT",icon:"∷"},{id:"link",label:"REPO / URL",icon:"⊞"}].map(m=>(
+          <button key={m.id} onClick={()=>setMode(m.id)} className="btn" style={{
+            padding:"8px 16px",
+            background:mode===m.id?D.accentLo:D.surface,
+            border:`1px solid ${mode===m.id?D.accent:D.border}`,
+            color:mode===m.id?D.accent:D.muted,
+            borderRadius:6,fontFamily:D.font,fontSize:10,letterSpacing:"0.08em",
+          }}>
+            {m.icon} {m.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Title */}
+      <div style={{marginBottom:14}}>
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.12em",marginBottom:6}}>
+          TITLE (AUTO-GENERATED IF EMPTY)
+        </div>
+        <input value={title} onChange={e=>setTitle(e.target.value)}
+          placeholder="Optional custom title..."
+          style={{width:"100%",padding:"10px 14px",fontSize:13,borderRadius:6}}
+        />
+      </div>
+
+      {/* Content */}
+      {mode==="paste" ? (
+        <div style={{marginBottom:20}}>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.12em",marginBottom:6}}>
+            PASTE — CODE, NOTES, RESEARCH, MARKDOWN, SPEC
+          </div>
+          <textarea value={text} onChange={e=>setText(e.target.value)}
+            placeholder={"Paste anything — code, a README, research notes, development log, technical spec, essay…\n\nThe classifier will detect: project, repository, research, development, experiment, writing, embed."}
+            rows={11}
+            style={{width:"100%",padding:"14px",fontSize:12,fontFamily:D.font,
+              lineHeight:1.75,resize:"vertical",borderRadius:6}}
+          />
+        </div>
+      ) : (
+        <div style={{marginBottom:20}}>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.12em",marginBottom:6}}>
+            REPOSITORY OR PAGE URL
+          </div>
+          <input value={url} onChange={e=>{setUrl(e.target.value);setText(e.target.value);}}
+            placeholder="https://github.com/deontewatts/..."
+            style={{width:"100%",padding:"10px 14px",fontSize:13,borderRadius:6}}
+          />
+        </div>
+      )}
+
+      {/* Live preview */}
+      {preview&&(
+        <div className="fu" style={{
+          background:D.card,border:`1px solid ${D.accent}30`,
+          borderLeft:`3px solid ${D.accent}`,borderRadius:8,padding:18,marginBottom:20,
+        }}>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.accent,letterSpacing:"0.12em",marginBottom:12}}>
+            ── AUTO-CLASSIFICATION PREVIEW
+          </div>
+          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:8}}>
+            <TBadge type={preview.type}/>
+            {preview.tags.length>0&&(
+              <span style={{fontFamily:D.font,fontSize:10,color:D.muted}}>
+                {preview.tags.length} tags · {preview.stack.length} stack items
+              </span>
+            )}
+          </div>
+          <div style={{fontFamily:D.font,fontSize:13,color:D.text,marginBottom:6}}>{preview.title}</div>
+          <div style={{fontSize:11,color:D.muted,lineHeight:1.7}}>{preview.summary.slice(0,140)}…</div>
+          {preview.tags.length>0&&(
+            <div style={{display:"flex",gap:5,marginTop:10,flexWrap:"wrap"}}>
+              {preview.tags.map(t=><Chip key={t} label={t}/>)}
+            </div>
+          )}
+        </div>
+      )}
+
+      <button onClick={submit} disabled={!raw.trim()} className="btn" style={{
+        padding:"12px 28px",
+        background:done?"#00c880":D.accent, color:D.bg,
+        borderRadius:6,fontFamily:D.font,fontSize:12,fontWeight:700,
+        letterSpacing:"0.1em",opacity:!raw.trim()?0.45:1,
+        transition:"all 0.2s",
+      }}>
+        {done?"✓ ADDED TO LIBRARY":"⊹ INGEST CONTENT"}
+      </button>
+    </div>
+  );
+}
+
+/* ── EMBED PAGE ────────────────────────────────────────────────────────── */
+const INIT_EMBEDS = [
+  {
+    id:"emb1", title:"REF Engine — Corpus Output", etype:"code",
+    desc:"Live scoring output for 7 uploaded documents.",
+    code:`# REF Agentic Pipeline · run=20260315_024413
+# 7 documents scored · All RECOGNITIVE
+
+1. Cognitive_Fidelity_Dynamics  →  0.8881  RECOGNITIVE
+2. The_Cosmic_Schematics         →  0.8765  RECOGNITIVE
+3. Sovereign_AI_Immune_System    →  0.8702  RECOGNITIVE
+4. The-Spark-Node-Protocol-10    →  0.8650  RECOGNITIVE
+5. Metaphysical_Cartography      →  0.8625  RECOGNITIVE
+6. AEON_Sentinel_Sovereign       →  0.8424  RECOGNITIVE
+7. JEA1-Cognitive-Architecture   →  0.8047  RECOGNITIVE
+
+Top discriminant axis: Affect ψ₃
+Corpus centroid: Recognition=0.898 · Fidelity=0.975`,
+  },
+  {
+    id:"emb2", title:"OctaTouch Gesture Map", etype:"widget",
+    desc:"Eight-finger gesture language visualizer.", code:null,
+  },
+  {
+    id:"emb3", title:"Architect's Manifesto — Metrics", etype:"code",
+    desc:"ECTI · CSM · STL · KAQ performance targets.",
+    code:`ECTI  Ethics-as-Code Translational Integrity
+      Target: >99% structural fidelity
+      Ethics treated as immutable architectural laws
+
+CSM   Cognitive Symbiosis Metric
+      Target: Amplify human creativity / agency
+      AI as collaborator, not replacement
+
+STL   Sentinel Transparency Latency
+      Target: <100ms fault identification
+      Computational analog to hospitality grace-recovery
+
+KAQ   Kinship Architecture Quotient
+      Target: ∞ contextual depth
+      Composable kinship through memory + emotional intelligence`,
+  },
+];
+
+function EmbedPage() {
+  const [embeds, setEmbeds] = useState(INIT_EMBEDS);
+  const [adding, setAdding] = useState(false);
+  const [ne, setNe] = useState({title:"",etype:"code",code:"",desc:""});
+
+  function add() {
+    setEmbeds([...embeds,{id:`e${Date.now()}`,title:ne.title||"Embed",etype:ne.etype,desc:ne.desc,code:ne.code}]);
+    setAdding(false); setNe({title:"",etype:"code",code:"",desc:""});
+  }
+
+  return (
+    <div style={{padding:"40px 28px 60px"}}>
+      <div className="fu" style={{marginBottom:28,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+        <div>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:8}}>── EMBEDS</div>
+          <h2 style={{fontFamily:D.font,fontSize:26,fontWeight:700,color:D.text}}>Embed Library</h2>
+        </div>
+        <button onClick={()=>setAdding(!adding)} className="btn" style={{
+          padding:"9px 18px",background:D.accent,color:D.bg,
+          borderRadius:6,fontFamily:D.font,fontSize:11,fontWeight:700,letterSpacing:"0.08em",
+        }}>⊹ ADD EMBED</button>
+      </div>
+
+      {adding&&(
+        <div className="fu" style={{
+          background:D.card,border:`1px solid ${D.accent}30`,
+          borderRadius:8,padding:20,marginBottom:20,
+        }}>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.accent,letterSpacing:"0.12em",marginBottom:14}}>
+            ── NEW EMBED
+          </div>
+          <input value={ne.title} onChange={e=>setNe({...ne,title:e.target.value})}
+            placeholder="Embed title..." style={{width:"100%",padding:"9px 12px",fontSize:13,marginBottom:10,borderRadius:6}}/>
+          <input value={ne.desc} onChange={e=>setNe({...ne,desc:e.target.value})}
+            placeholder="Short description..." style={{width:"100%",padding:"9px 12px",fontSize:12,marginBottom:10,borderRadius:6}}/>
+          <select value={ne.etype} onChange={e=>setNe({...ne,etype:e.target.value})}
+            style={{width:"100%",padding:"9px 12px",fontSize:11,marginBottom:10,borderRadius:6,fontFamily:D.font}}>
+            {["code","iframe","video","document","chart","widget"].map(t=>(
+              <option key={t} value={t}>{t.toUpperCase()}</option>
+            ))}
+          </select>
+          <textarea value={ne.code} onChange={e=>setNe({...ne,code:e.target.value})}
+            placeholder="Paste iframe code, snippet, URL, or content..."
+            rows={4} style={{width:"100%",padding:"10px",fontSize:11,fontFamily:D.font,resize:"vertical",marginBottom:12,borderRadius:6}}/>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={add} className="btn" style={{
+              padding:"8px 18px",background:D.accent,color:D.bg,
+              borderRadius:6,fontFamily:D.font,fontSize:11,fontWeight:700,
+            }}>SAVE</button>
+            <button onClick={()=>setAdding(false)} className="btn" style={{
+              padding:"8px 18px",background:"none",border:`1px solid ${D.border}`,
+              color:D.muted,borderRadius:6,fontFamily:D.font,fontSize:11,
+            }}>CANCEL</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:14}}>
+        {embeds.map(e=>(
+          <div key={e.id} className="ch" style={{
+            background:D.card,border:`1px solid ${D.border}`,
+            borderRadius:8,overflow:"hidden",
+          }}>
+            <div style={{padding:"14px 18px",borderBottom:`1px solid ${D.border}`}}>
+              <TBadge type="embed"/>
+              <h3 style={{fontFamily:D.font,fontSize:12,fontWeight:700,color:D.text,marginTop:8}}>{e.title}</h3>
+              {e.desc&&<p style={{color:D.muted,fontSize:11,marginTop:4}}>{e.desc}</p>}
+            </div>
+            <div style={{
+              minHeight:160,background:D.bg,
+              display:"flex",alignItems:e.code?"flex-start":"center",
+              justifyContent:e.code?"flex-start":"center",
+              overflow:"hidden",
+            }}>
+              {e.etype==="code"&&e.code ? (
+                <pre style={{
+                  width:"100%",padding:"14px 16px",
+                  color:D.accent,fontSize:10,fontFamily:D.font,
+                  lineHeight:1.9,overflow:"auto",background:"transparent",
+                  maxHeight:220,
+                }}>{e.code}</pre>
+              ) : (
+                <div style={{
+                  color:D.muted,fontFamily:D.font,fontSize:10,
+                  letterSpacing:"0.1em",textAlign:"center",
+                }}>
+                  <div style={{fontSize:22,marginBottom:8}}>⊻</div>
+                  {e.etype.toUpperCase()} EMBED
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── DASHBOARD PAGE ────────────────────────────────────────────────────── */
+function DashboardPage({items, setPage, onSelect}) {
+  const byType = {};
+  for(const i of items) byType[i.type]=(byType[i.type]||0)+1;
+  const total = items.length||1;
+
+  return (
+    <div style={{padding:"40px 28px 60px"}}>
+      <div className="fu" style={{marginBottom:36}}>
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:8}}>
+          ── COMMAND CENTER
+        </div>
+        <h2 style={{fontFamily:D.font,fontSize:26,fontWeight:700,color:D.text}}>Dashboard</h2>
+      </div>
+
+      {/* Distribution */}
+      <div className="fu1" style={{marginBottom:36}}>
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.14em",marginBottom:16}}>
+          CONTENT DISTRIBUTION
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:10}}>
+          {Object.entries(TC).map(([type,c])=>{
+            const count = byType[type]||0;
+            const pct   = (count/total)*100;
+            const pageMap = {project:"projects",repository:"repositories",research:"research",
+              development:"developments",experiment:"experiments",embed:"embeds"};
+            return (
+              <div key={type} onClick={()=>setPage(pageMap[type]||"projects")} className="ch" style={{
+                background:D.card,border:`1px solid ${D.border}`,borderRadius:8,padding:"14px 16px",
+              }}>
+                <div style={{fontSize:16,marginBottom:6}}>{c.icon}</div>
+                <div style={{fontFamily:D.font,fontSize:20,fontWeight:700,color:c.text}}>{count}</div>
+                <div style={{fontFamily:D.font,fontSize:8,color:D.muted,letterSpacing:"0.1em",marginTop:2}}>
+                  {type.toUpperCase()}
+                </div>
+                <div style={{height:2,background:D.dim,borderRadius:1,marginTop:10}}>
+                  <div style={{height:"100%",width:`${pct}%`,background:c.border,borderRadius:1,transition:"width 0.6s"}}/>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Item list */}
+      <div className="fu2">
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.14em",marginBottom:14}}>
+          ALL CONTENT — {items.length} ITEMS
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {items.map(item=>{
+            const c=TC[item.type]||TC.custom;
+            return (
+              <div key={item.id} onClick={()=>onSelect(item)} className="ch" style={{
+                background:D.card,border:`1px solid ${D.border}`,
+                borderLeft:`3px solid ${c.border}`,borderRadius:6,
+                padding:"11px 18px",display:"flex",alignItems:"center",gap:14,
+              }}>
+                <span style={{fontSize:13,color:c.text,flexShrink:0}}>{c.icon}</span>
+                <span style={{fontFamily:D.font,fontSize:12,color:D.text,flex:1,minWidth:0,
+                  overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  {item.title}
+                </span>
+                <div style={{display:"flex",gap:5,flexShrink:0}}>
+                  {item.tags.slice(0,2).map(t=><Chip key={t} label={t}/>)}
+                </div>
+                <span style={{fontFamily:D.font,fontSize:9,color:D.muted,flexShrink:0}}>
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </span>
+                {item.featured&&<span style={{color:D.accent,fontSize:9,flexShrink:0}}>★</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── ABOUT PAGE ────────────────────────────────────────────────────────── */
+function AboutPage() {
+  const metrics = [
+    {k:"ECTI",d:"Ethics-as-Code Translational Integrity",v:">99% fidelity"},
+    {k:"CSM", d:"Cognitive Symbiosis Metric",           v:"Amplify, not replace"},
+    {k:"STL", d:"Sentinel Transparency Latency",         v:"<100ms recovery"},
+    {k:"KAQ", d:"Kinship Architecture Quotient",          v:"∞ contextual depth"},
+  ];
+  const eco = ["OctaTouch™ Universal Gesture Engine","AEON Sentinel","REF Engine",
+    "NorCal Volley Intel","RepRally","Ethos Aegis","The Architect's Manifesto"];
+
+  return (
+    <div style={{padding:"40px 28px 60px",maxWidth:700}}>
+      <div className="fu">
+        <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:8}}>── IDENTITY</div>
+        <h2 style={{fontFamily:D.font,fontSize:36,fontWeight:700,lineHeight:1.1,marginBottom:22}}>
+          The Symbiotic<br/>
+          <span style={{background:`linear-gradient(90deg,${D.accent},${D.blue})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+            Architect
+          </span>
+        </h2>
+        <p style={{color:D.muted,fontSize:14,lineHeight:1.9,marginBottom:20,fontFamily:D.body}}>
+          Deonte Watts operates at the convergence of hospitality, artificial intelligence,
+          and ethical computational design — a bridge-builder between the experiential intuitions
+          of human service and the algorithmic formalism of AI engineering.
+        </p>
+        <p style={{color:D.muted,fontSize:14,lineHeight:1.9,marginBottom:44,fontFamily:D.body}}>
+          At CCE Hospitality Group in San Francisco, he embodies the emerging field of
+          hospitality systems architecture — where guest experience principles meet synthetic
+          reasoning frameworks. Every system is built to serve with grace under load, repairing
+          trust immediately when errors occur. The STL metric is a direct computational
+          analog to a maître d' who corrects an issue before it becomes a disruption.
+        </p>
+
+        {/* Manifesto */}
+        <div style={{marginBottom:44}}>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:16}}>
+            ── THE ARCHITECT'S MANIFESTO — CORE METRICS
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            {metrics.map(m=>(
+              <div key={m.k} style={{
+                background:D.card,border:`1px solid ${D.border}`,
+                borderLeft:`2px solid ${D.accent}`,borderRadius:8,padding:"18px 20px",
+              }}>
+                <div style={{fontFamily:D.font,fontSize:16,fontWeight:700,color:D.accent,marginBottom:5}}>{m.k}</div>
+                <div style={{fontSize:12,color:D.muted,marginBottom:8,lineHeight:1.6}}>{m.d}</div>
+                <div style={{fontFamily:D.font,fontSize:11,color:D.text}}>→ {m.v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Ecosystem */}
+        <div>
+          <div style={{fontFamily:D.font,fontSize:9,color:D.muted,letterSpacing:"0.16em",marginBottom:14}}>
+            ── NAMED ACTIVE ECOSYSTEM
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:7}}>
+            {eco.map((p,i)=>(
+              <div key={p} style={{
+                display:"flex",alignItems:"center",gap:12,
+                padding:"11px 16px",background:D.card,
+                border:`1px solid ${D.border}`,borderRadius:6,
+              }}>
+                <span style={{fontFamily:D.font,fontSize:10,color:D.muted,width:20,textAlign:"right"}}>
+                  {String(i+1).padStart(2,"0")}
+                </span>
+                <span style={{fontFamily:D.font,fontSize:12,color:D.text,flex:1}}>{p}</span>
+                <span style={{color:D.accent,fontSize:12}}>→</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── MAIN APP ──────────────────────────────────────────────────────────── */
+export default function DevHQ() {
+  const [page, setPage]           = useState("home");
+  const [items, setItems]         = useState(SEED);
+  const [search, setSearch]       = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [selected, setSelected]   = useState(null);
+  const [ready, setReady]         = useState(false);
+
+  /* storage load */
+  useEffect(()=>{
+    (async()=>{
+      try {
+        const r = await window.storage.get("devhq-v2");
+        const parsed = JSON.parse(r.value);
+        if(parsed?.length) setItems(parsed);
+      } catch {
+        try { await window.storage.set("devhq-v2", JSON.stringify(SEED)); } catch{}
+      }
+      setReady(true);
+    })();
+  },[]);
+
+  const saveItems = useCallback(async (next)=>{
+    setItems(next);
+    try { await window.storage.set("devhq-v2", JSON.stringify(next)); } catch{}
+  },[]);
+
+  const addItem = useCallback((item)=>{
+    saveItems([item,...items]);
+  },[items, saveItems]);
+
+  /* filtered items */
+  const filtered = useMemo(()=>{
+    let list = items;
+    if(typeFilter!=="all") list = list.filter(i=>i.type===typeFilter);
+    if(search.trim()){
+      const q = search.toLowerCase();
+      list = list.filter(i=>
+        i.title.toLowerCase().includes(q)||
+        i.summary.toLowerCase().includes(q)||
+        i.tags.some(t=>t.toLowerCase().includes(q))||
+        i.stack.some(s=>s.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  },[items, typeFilter, search]);
+
+  const showTopBar = !["home","ingest","embeds","about"].includes(page);
+  const TITLE = {
+    projects:"Projects", repositories:"Repositories", research:"Research",
+    developments:"Developments", experiments:"Experiments",
+    dashboard:"Dashboard",
+  };
+
+  if(!ready) return (
+    <div style={{
+      minHeight:"100vh",background:D.bg,
+      display:"flex",alignItems:"center",justifyContent:"center",
+    }}>
+      <Fonts/>
+      <div style={{fontFamily:D.font,fontSize:12,color:D.accent,letterSpacing:"0.2em",animation:"pulseGlow 1.5s infinite"}}>
+        LOADING · DW·HQ
+      </div>
+    </div>
+  );
+
+  function renderPage() {
+    if(page==="home")    return <HomePage items={items} setPage={setPage} onSelect={setSelected}/>;
+    if(page==="about")   return <AboutPage/>;
+    if(page==="embeds")  return <EmbedPage/>;
+    if(page==="ingest")  return <IngestPage onAdd={addItem} setPage={setPage}/>;
+    if(page==="dashboard") return <DashboardPage items={filtered} setPage={setPage} onSelect={setSelected}/>;
+    const type = PAGE_TYPE[page];
+    if(type) return <ContentPage title={TITLE[page]} type={type} items={filtered} onSelect={setSelected}/>;
+    return <HomePage items={items} setPage={setPage} onSelect={setSelected}/>;
+  }
+
+  return (
+    <div style={{minHeight:"100vh",background:D.bg,color:D.text}}>
+      <Fonts/>
+      <GridBg/>
+      <Sidebar page={page} setPage={p=>{setPage(p);setSearch("");setTypeFilter("all");}}/>
+      <div style={{marginLeft:214,position:"relative",zIndex:1,minHeight:"100vh"}}>
+        {showTopBar&&(
+          <TopBar
+            search={search} setSearch={setSearch}
+            typeFilter={typeFilter} setTypeFilter={setTypeFilter}
+            onIngest={()=>setPage("ingest")}
+            title={TITLE[page]||null}
+          />
+        )}
+        {renderPage()}
+      </div>
+      <Detail item={selected} onClose={()=>setSelected(null)}/>
+    </div>
+  );
+}
