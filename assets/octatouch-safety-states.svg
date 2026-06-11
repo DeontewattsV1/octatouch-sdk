@@ -1,0 +1,37 @@
+<svg width="1200" height="860" viewBox="0 0 1200 860" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="860" rx="28" fill="#091321"/>
+  <text x="48" y="72" fill="#EAF6FF" font-family="Inter, Arial, sans-serif" font-size="40" font-weight="700">Safety and fallback states</text>
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="48" y="140" width="340" height="620" rx="24" fill="#102643" stroke="#214C7D"/>
+    <text x="84" y="194" fill="#EAF6FF" font-size="32" font-weight="700">Driving</text>
+    <text x="84" y="244" fill="#8FB0D2" font-size="22">Allowed</text>
+    <text x="84" y="288" fill="#7CFF9B" font-size="22">• Single tap</text>
+    <text x="84" y="324" fill="#7CFF9B" font-size="22">• Short swipe</text>
+    <text x="84" y="386" fill="#8FB0D2" font-size="22">Blocked</text>
+    <text x="84" y="430" fill="#FF9BA5" font-size="22">• Multi-finger gestures</text>
+    <text x="84" y="466" fill="#FF9BA5" font-size="22">• Pinch / clipboard</text>
+    <text x="84" y="502" fill="#FF9BA5" font-size="22">• Complex shortcuts</text>
+    <text x="84" y="580" fill="#EAF6FF" font-size="20">Toast:</text>
+    <text x="84" y="618" fill="#B7D7F6" font-size="20">“Complex gestures are limited while driving.”</text>
+
+    <rect x="430" y="140" width="340" height="620" rx="24" fill="#102643" stroke="#214C7D"/>
+    <text x="466" y="194" fill="#EAF6FF" font-size="32" font-weight="700">Parked</text>
+    <text x="466" y="244" fill="#8FB0D2" font-size="22">Allowed</text>
+    <text x="466" y="288" fill="#7CFF9B" font-size="22">• Full gesture set</text>
+    <text x="466" y="324" fill="#7CFF9B" font-size="22">• Clipboard actions</text>
+    <text x="466" y="360" fill="#7CFF9B" font-size="22">• Practice mode</text>
+    <text x="466" y="396" fill="#7CFF9B" font-size="22">• Undo / Redo</text>
+    <text x="466" y="580" fill="#EAF6FF" font-size="20">State cue:</text>
+    <text x="466" y="618" fill="#B7D7F6" font-size="20">“Driving mode” pill changes to “Parked”.</text>
+
+    <rect x="812" y="140" width="340" height="620" rx="24" fill="#102643" stroke="#214C7D"/>
+    <text x="848" y="194" fill="#EAF6FF" font-size="32" font-weight="700">Accessibility / limited hardware</text>
+    <text x="848" y="256" fill="#8FB0D2" font-size="22">Behavior</text>
+    <text x="848" y="300" fill="#7CFF9B" font-size="22">• Respect system gestures</text>
+    <text x="848" y="336" fill="#7CFF9B" font-size="22">• Redirect conflicts</text>
+    <text x="848" y="372" fill="#7CFF9B" font-size="22">• Fallback to tap controls</text>
+    <text x="848" y="434" fill="#EAF6FF" font-size="20">Examples</text>
+    <text x="848" y="472" fill="#B7D7F6" font-size="20">Three-finger tap → accessibility options</text>
+    <text x="848" y="508" fill="#B7D7F6" font-size="20">Resistive panel → limited touch support</text>
+  </g>
+</svg>
