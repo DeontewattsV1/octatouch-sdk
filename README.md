@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/product/readme-hero.svg" alt="OctaTouch — universal eight-channel gesture engine" width="100%" />
+</p>
+
 # OctaTouch SDK
 
 <div align="center">
@@ -49,6 +53,16 @@ make build        # Native C++ engine
 make test         # Full test suite
 make install      # SDK + dependencies
 ```
+
+## Visual assets & releases
+
+- [README hero](docs/assets/product/readme-hero.svg)
+- [16:9 launch graphic](docs/assets/product/launch-16x9.svg)
+- [Interactive CodeArt gesture demo](docs/assets/product/codeart-demo.html)
+- [Visual asset manifest](docs/assets/product/manifest.json)
+- [Release graphics workflow](.github/workflows/release-visual-assets.yml)
+
+Published GitHub Releases automatically receive PNG-rendered visual bundles in ZIP and TAR formats with `SHA256SUMS`. A manual workflow run builds the same package as an Actions artifact without publishing a release.
 
 ---
 
