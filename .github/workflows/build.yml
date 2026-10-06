@@ -6,14 +6,18 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     name: Build & Test (Ubuntu)
+    timeout-minutes: 15
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install dependencies
         run: |
@@ -21,27 +25,28 @@ jobs:
           sudo apt-get install -y cmake ninja-build clang-tidy
 
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
+        run: cmake -S . -B build-ci -DCMAKE_BUILD_TYPE=Release -G Ninja
 
       - name: Build
-        run: cmake --build build --parallel
+        run: cmake --build build-ci --parallel
 
       - name: Run tests
-        working-directory: build
+        working-directory: build-ci
         run: ctest --output-on-failure
 
       - name: Latency regression check
-        working-directory: build
+        working-directory: build-ci
         # Any test labelled LATENCY that exceeds 16 ms exits non-zero → blocks merge
         run: ctest -L LATENCY --output-on-failure
 
   lint:
     name: clang-format check
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install clang-format
         run: sudo apt-get install -y clang-format
@@ -49,5 +54,5 @@ jobs:
       - name: Check formatting
         run: |
           find core/ platforms/ integrations/ tests/ \
-            -name "*.cpp" -o -name "*.h" -o -name "*.c" | \
-            xargs clang-format --dry-run --Werror
+            \( -name "*.cpp" -o -name "*.h" -o -name "*.c" \) -print0 | \
+            xargs -0 clang-format --dry-run --Werror
