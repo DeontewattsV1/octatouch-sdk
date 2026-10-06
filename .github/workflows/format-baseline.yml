@@ -1,0 +1,47 @@
+name: Apply clang-format baseline
+
+on:
+  push:
+    branches: [fix/ci-baseline]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.repository == 'DeontewattsV1/octatouch-sdk'
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: fix/ci-baseline
+
+      - name: Install clang-format
+        run: sudo apt-get update -qq && sudo apt-get install -y clang-format
+
+      - name: Apply repository formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          find core/ platforms/ integrations/ tests/ \
+            \( -name "*.cpp" -o -name "*.h" -o -name "*.c" \) -print0 | \
+            xargs -0 clang-format -i
+          git diff --check
+
+      - name: Commit mechanical formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No formatting changes required."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add core platforms integrations tests
+          git commit -m "style: apply clang-format baseline"
+          git push origin HEAD:fix/ci-baseline
