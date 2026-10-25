@@ -8,8 +8,7 @@ namespace octatouch {
 
 class FingerTracker {
 public:
-  std::map<FingerId, RawTouchSample>
-  assignIdentities(const GestureInputFrame &frame) const;
+    std::map<FingerId, RawTouchSample> assignIdentities(const GestureInputFrame& frame) const;
 };
 
-} // namespace octatouch
+}  // namespace octatouch
