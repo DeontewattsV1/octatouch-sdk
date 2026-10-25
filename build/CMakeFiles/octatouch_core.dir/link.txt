@@ -1,0 +1,2 @@
+/usr/bin/ar qc liboctatouch_core.a CMakeFiles/octatouch_core.dir/core/src/Types.cpp.o CMakeFiles/octatouch_core.dir/core/src/FingerTracker.cpp.o CMakeFiles/octatouch_core.dir/core/src/GestureRecognizer.cpp.o CMakeFiles/octatouch_core.dir/core/src/IntentResolver.cpp.o CMakeFiles/octatouch_core.dir/core/src/GestureEngine.cpp.o
+/usr/bin/ranlib liboctatouch_core.a
