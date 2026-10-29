@@ -9,11 +9,11 @@
 namespace octatouch {
 
 struct GestureInputFrame {
-    std::uint64_t timestamp_us{0};
-    std::vector<RawTouchSample> samples;
-    std::string deviceId;
-    ToolType toolType{ToolType::Touch};
-    CapabilityFlags capabilities{};
+  std::uint64_t timestamp_us{0};
+  std::vector<RawTouchSample> samples;
+  std::string deviceId;
+  ToolType toolType{ToolType::Touch};
+  CapabilityFlags capabilities{};
 };
 
-}  // namespace octatouch
+} // namespace octatouch

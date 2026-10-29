@@ -43,9 +43,10 @@ constexpr float kThreeFingerTapPressureMin = 0.7F;
 // for a left-swipe.
 constexpr float kThreeFingerSwipeEdge = 0.75F;
 
-// ── JS Parity Runtime ─────────────────────────────────────────────────────────
-// These are duplicated in octatouchConstants.js. If you update one set,
-// update the other to keep JS/C++ behaviour in sync.
+// ── JS Parity Runtime
+// ───────────────────────────────────────────────────────── These are
+// duplicated in octatouchConstants.js. If you update one set, update the other
+// to keep JS/C++ behaviour in sync.
 
 // Maximum tap duration in milliseconds. A touch shorter than this that also
 // stays within kTapMoveThreshold is classified as a tap.
@@ -69,7 +70,8 @@ constexpr float kSwipeMoveThreshold = 0.14F;
 // pinch (either direction).
 constexpr float kPinchDeltaThreshold = 0.12F;
 
-// ── Confidence Values ─────────────────────────────────────────────────────────
+// ── Confidence Values
+// ─────────────────────────────────────────────────────────
 
 // Baseline confidence emitted for any successfully recognised gesture.
 constexpr float kBaseConfidence = 0.82F;
@@ -91,5 +93,5 @@ constexpr float kCppDrivingModeBlockConfidence = 0.98F;
 // the C++ recogniser uses contact-area heuristics rather than time-based).
 constexpr float kCppBaseConfidence = 0.82F;
 
-}  // namespace constants
-}  // namespace octatouch
+} // namespace constants
+} // namespace octatouch

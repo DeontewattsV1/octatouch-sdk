@@ -10,16 +10,17 @@ namespace octatouch {
 
 class GestureEngine {
 public:
-    using ResultCallback = std::function<void(const GestureResult&)>;
+  using ResultCallback = std::function<void(const GestureResult &)>;
 
-    void setCallback(ResultCallback callback);
-    GestureResult feedFrame(const GestureInputFrame& frame, const PlatformContext& context) const;
+  void setCallback(ResultCallback callback);
+  GestureResult feedFrame(const GestureInputFrame &frame,
+                          const PlatformContext &context) const;
 
 private:
-    FingerTracker fingerTracker_{};
-    GestureRecognizer gestureRecognizer_{};
-    IntentResolver intentResolver_{};
-    ResultCallback callback_{};
+  FingerTracker fingerTracker_{};
+  GestureRecognizer gestureRecognizer_{};
+  IntentResolver intentResolver_{};
+  ResultCallback callback_{};
 };
 
-}  // namespace octatouch
+} // namespace octatouch
