@@ -1,0 +1,900 @@
+<repomix><file_summary>This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+The content has been processed where comments have been removed, empty lines have been removed, line numbers have been added, content has been formatted for parsing in xml style, content has been compressed (code blocks are separated by ⋮---- delimiter).<purpose>This file contains a packed representation of the entire repository&apos;s contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.</purpose><file_format>The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file</file_format><usage_guidelines>- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.</usage_guidelines><notes>- Some files may have been excluded based on .gitignore rules and Repomix&apos;s configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Code comments have been removed from supported file types
+- Empty lines have been removed from all files
+- Line numbers have been added to the beginning of each line
+- Content has been formatted for parsing in xml style
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)</notes></file_summary><directory_structure>octatouch-sdk-core/
+  .claude/
+    skills/
+      repo-bootstrap/
+        SKILL.md
+      add-platform-adapter.md
+      build-test-verify.md
+      git-commit.md
+      pull-request.md
+  .github/
+    workflows/
+      build.yml
+  core/
+    include/
+      FingerTracker.h
+      GestureEngine.h
+      GestureInputFrame.h
+      GestureRecognizer.h
+      GestureResult.h
+      IntentResolver.h
+      PlatformContext.h
+      Types.h
+    src/
+      FingerTracker.cpp
+      GestureEngine.cpp
+      GestureRecognizer.cpp
+      IntentResolver.cpp
+      Types.cpp
+  docs/
+    agent-guides/
+      ad7879-firmware.md
+      bootstrap.md
+      gesture-engine-architecture.md
+      in-vehicle-hmi.md
+    gesture-vocabulary.md
+  integrations/
+    firmware-ad7879/
+      ad7879_bist.c
+      ad7879_config.h
+      ad7879_driver.c
+    in-vehicle-hmi/
+      CANBusMonitor.cpp
+      DrivingModeGate.cpp
+    text-editor/
+      TextSelectionPlugin.ts
+  platforms/
+    web/
+      PointerEventAdapter.ts
+  tests/
+    integration/
+      README.md
+    latency/
+      README.md
+    unit/
+      smoke_test.cpp
+  .gitignore
+  CLAUDE.md
+  CMakeLists.txt
+  Makefile
+  README.md</directory_structure><files>This section contains the contents of the repository&apos;s files.<file path="octatouch-sdk-core/.claude/skills/repo-bootstrap/SKILL.md"># Repo Bootstrap Skill
+
+Use this skill when extending the bootstrap scaffold into production modules.
+
+- Preserve public types first.
+- Avoid platform leakage into the core.
+- Keep gesture mappings canonical.</file><file path="octatouch-sdk-core/.claude/skills/add-platform-adapter.md">---
+name: add-platform-adapter
+description: Step-by-step guide for adding a new platform adapter to OctaTouch SDK Core.
+---
+
+# Add Platform Adapter Skill
+
+## Analogy
+An adapter is a **power-plug converter**: it converts country-specific voltage (platform touch events) to the
+universal USB-C form (GestureInputFrame) the core pipeline expects. The converter contains zero logic about
+what the device does — only translation.
+
+## Step 1 — Create the adapter directory
+
+```bash
+mkdir -p platforms/&lt;target&gt;/
+```
+
+Examples: `platforms/ios/`, `platforms/android/`, `platforms/unreal/`
+
+## Step 2 — Implement the three responsibilities
+
+Every adapter does exactly three things — no more:
+
+| Responsibility | Description |
+|----------------|-------------|
+| **Capture** | Subscribe to the platform&apos;s native touch event source |
+| **Translate** | Convert raw events into `octatouch::GestureInputFrame` |
+| **Feed** | Call `GestureEngine::feedFrame(frame, context)` |
+
+```cpp
+// Minimal adapter contract (C++ example)
+#include &quot;GestureEngine.h&quot;
+#include &quot;PlatformContext.h&quot;
+
+class MyPlatformAdapter {
+    octatouch::GestureEngine engine_;
+public:
+    void onNativeTouchEvent(const NativeEvent&amp; evt) {
+        auto frame = translate(evt);              // Capture + Translate
+        auto ctx   = buildContext();              // PlatformContext
+        engine_.feedFrame(frame, ctx);            // Feed
+    }
+};
+```
+
+## Step 3 — Wire into CMakeLists.txt
+
+```cmake
+# In CMakeLists.txt — add your adapter source:
+target_sources(octatouch_core PRIVATE
+    platforms/&lt;target&gt;/MyPlatformAdapter.cpp
+)
+```
+
+## Step 4 — Add a smoke test
+
+Add to `tests/unit/smoke_test.cpp` — at minimum, feed one synthetic frame and assert intent is not `Unknown`.
+
+## Rules
+- **Never** call platform APIs from `core/`.
+- **Never** perform intent logic inside an adapter — that belongs in `IntentResolver`.
+- Set `PlatformContext.vehicleState` correctly if the platform is automotive.
+- Document the adapter&apos;s max touch-event latency budget in a comment at the top of the file.
+
+## Deep Reference
+For gesture engine internals: `docs/agent-guides/gesture-engine-architecture.md`</file><file path="octatouch-sdk-core/.claude/skills/build-test-verify.md">---
+name: build-test-verify
+description: Full build, test, and lint cycle for the OctaTouch SDK Core C++17 project.
+---
+
+# Build → Test → Verify
+
+## Steps (run in order)
+
+```bash
+# 1. Configure (first time only, or after CMakeLists changes)
+make init
+
+# 2. Compile
+make build
+
+# 3. Run unit + smoke suite
+make test
+
+# 4. Static analysis (if clang-tidy is installed)
+cd build &amp;&amp; cmake --build . --target clang-tidy 2&gt;&amp;1 | grep -E &quot;warning:|error:&quot;
+```
+
+## Pass Criteria
+- `make build` exits 0 with no warnings on `-Wall -Wextra`.
+- `make test` reports 0 failures; any latency test violation is treated as a **release blocker**.
+- No new platform API symbols introduced into `core/` (grep for `#include &lt;platform` in `core/src/`).
+
+## Common Failures
+
+| Symptom | Fix |
+|---------|-----|
+| CMake can&apos;t find compiler | `make init` from a clean workspace |
+| Undefined symbol in adapter | Check that adapter `.cpp` is listed in `CMakeLists.txt` |
+| Latency test flaky | Re-run 3× — if consistently &gt;16 ms, file a blocker issue |
+
+## Rules
+- Do **not** commit with failing tests.
+- Keep linting deterministic — use `clang-format` config, not ad hoc style edits.</file><file path="octatouch-sdk-core/.claude/skills/git-commit.md">---
+name: git-commit
+description: Format and create Conventional Commits for the OctaTouch SDK Core repo.
+---
+
+# Git Commit Skill
+
+## Commit Message Format
+
+```
+&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
+
+[optional body — what and why, not how]
+[optional footer: BREAKING CHANGE or Closes #N]
+```
+
+## Allowed Types
+
+| Type | When |
+|------|------|
+| `feat` | New gesture, new platform adapter, new integration surface |
+| `fix` | Bug in pipeline stage or incorrect intent mapping |
+| `perf` | Latency improvement |
+| `refactor` | Internal restructure without behaviour change |
+| `test` | Adding or fixing tests |
+| `docs` | Documentation only |
+| `chore` | Build system, CI, dependency updates |
+| `revert` | Reverting a prior commit |
+
+## Scope Examples
+`core`, `web-adapter`, `in-vehicle`, `ad7879`, `ci`, `docs`, `types`
+
+## Good Examples
+
+```
+feat(core): add EightFingerRotate recognition in GestureRecognizer
+
+perf(web-adapter): reduce PointerEvent debounce from 8 ms to 4 ms
+
+fix(in-vehicle): gate ThreeFingerPinchIn on parked state in IntentResolver
+
+BREAKING CHANGE: GestureResult.intent field renamed from `action` to `intent`
+```
+
+## Rules
+- Subject line ≤ 72 characters, imperative mood, no trailing period.
+- Never commit with `build/` contents — `.gitignore` already excludes it.
+- One logical change per commit.</file><file path="octatouch-sdk-core/.claude/skills/pull-request.md">---
+name: pull-request
+description: Open and self-review a pull request for the OctaTouch SDK Core repo.
+---
+
+# Pull Request Skill
+
+## Pre-PR Checklist (run `.claude/skills/build-test-verify.md` first)
+
+- [ ] `make build` and `make test` pass cleanly.
+- [ ] No platform API symbols leaked into `core/`.
+- [ ] Gesture vocabulary unchanged, or change is intentional and documented in `docs/gesture-vocabulary.md`.
+- [ ] Commit messages follow Conventional Commits format.
+
+## PR Title Format
+
+```
+&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
+```
+Match the commit type and scope of the primary change.
+
+## PR Description Template
+
+```markdown
+## What
+&lt;!-- One paragraph: what changed and why. --&gt;
+
+## Pipeline Impact
+&lt;!-- Does this touch FingerTracker / GestureRecognizer / IntentResolver? Note it here. --&gt;
+
+## Test Coverage
+&lt;!-- New tests added? Existing tests updated? --&gt;
+
+## Breaking Changes
+&lt;!-- ABI changes? Gesture vocabulary changes? None? --&gt;
+
+## Checklist
+- [ ] `make test` passes
+- [ ] No `build/` artifacts committed
+- [ ] `docs/gesture-vocabulary.md` updated if gestures changed
+- [ ] CHANGELOG entry added (if user-facing)
+```
+
+## Self-Review Rules
+- Read the diff once from the perspective of a safety reviewer (driving-mode gates, accessibility gates).
+- Confirm `IntentResolver` is the only place that blocks intents — never block in adapter code.
+- Confirm no latency test was silently deleted to make tests pass.
+
+## Branch Protection
+`main` is protected. All PRs require CI to pass before merge.</file><file path="octatouch-sdk-core/.github/workflows/build.yml">name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  build-and-test:
+    name: Build &amp; Test (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build clang-tidy
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Run tests
+        working-directory: build
+        run: ctest --output-on-failure
+      - name: Latency regression check
+        working-directory: build
+        run: ctest -L LATENCY --output-on-failure
+  lint:
+    name: clang-format check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+      - name: Check formatting
+        run: |
+          find core/ platforms/ integrations/ tests/ \
+            -name &quot;*.cpp&quot; -o -name &quot;*.h&quot; -o -name &quot;*.c&quot; | \
+            xargs clang-format --dry-run --Werror</file><file path="octatouch-sdk-core/core/include/FingerTracker.h"></file><file path="octatouch-sdk-core/core/include/GestureEngine.h">void setCallback(ResultCallback callback);
+GestureResult feedFrame(const GestureInputFrame&amp; frame, const PlatformContext&amp; context) const;</file><file path="octatouch-sdk-core/core/include/GestureInputFrame.h">struct GestureInputFrame {</file><file path="octatouch-sdk-core/core/include/GestureRecognizer.h">GestureType recognize(const std::map&lt;FingerId, RawTouchSample&gt;&amp; fingers) const;</file><file path="octatouch-sdk-core/core/include/GestureResult.h">struct GestureResult {</file><file path="octatouch-sdk-core/core/include/IntentResolver.h">GestureResult resolve(GestureType primitive, const FingerSet&amp; activeFingers, const PlatformContext&amp; ctx,</file><file path="octatouch-sdk-core/core/include/PlatformContext.h">struct AccessibilityFlags {
+⋮----
+struct PlatformContext {</file><file path="octatouch-sdk-core/core/include/Types.h">enum class FingerId {
+⋮----
+enum class GestureType {
+⋮----
+enum class GestureIntent {
+⋮----
+enum class ToolType {
+⋮----
+enum class VehicleState {
+⋮----
+struct CapabilityFlags {
+⋮----
+struct RawTouchSample {
+⋮----
+std::string to_string(FingerId fingerId);
+std::string to_string(GestureType gestureType);
+std::string to_string(GestureIntent intent);</file><file path="octatouch-sdk-core/core/src/FingerTracker.cpp">std::map&lt;FingerId, RawTouchSample&gt; FingerTracker::assignIdentities(const GestureInputFrame&amp; frame) const {</file><file path="octatouch-sdk-core/core/src/GestureEngine.cpp">void GestureEngine::setCallback(ResultCallback callback) {
+⋮----
+GestureResult GestureEngine::feedFrame(const GestureInputFrame&amp; frame, const PlatformContext&amp; context) const {</file><file path="octatouch-sdk-core/core/src/GestureRecognizer.cpp">GestureType GestureRecognizer::recognize(const std::map&lt;FingerId, RawTouchSample&gt;&amp; fingers) const {</file><file path="octatouch-sdk-core/core/src/IntentResolver.cpp">bool isAccessibilityConflict(GestureType primitive, const PlatformContext&amp; ctx) {
+⋮----
+bool isStationaryOnly(GestureType primitive) {
+⋮----
+GestureIntent mapPrimitiveToIntent(GestureType primitive) {
+⋮----
+GestureResult IntentResolver::resolve(GestureType primitive, const FingerSet&amp; activeFingers, const PlatformContext&amp; ctx,</file><file path="octatouch-sdk-core/core/src/Types.cpp">std::string to_string(FingerId fingerId) {
+⋮----
+std::string to_string(GestureType gestureType) {
+⋮----
+std::string to_string(GestureIntent intent) {</file><file path="octatouch-sdk-core/docs/agent-guides/ad7879-firmware.md"># AD7879 Hardware Integration Guide
+
+&gt; Load this guide when: working in `integrations/firmware-ad7879/`, configuring the resistive
+&gt; touch controller, or debugging coordinate / latency issues on embedded panels.
+
+## What Is the AD7879?
+
+The AD7879 is a **4-wire resistive touch screen controller** with:
+- Integrated 12-bit ADC
+- I²C (up to 400 kHz) and SPI (up to 2 MHz) interface
+- Programmable median and averaging filters
+- Built-in self-test (BIST) routine
+
+**Key limitation vs. capacitive:** No native multi-touch hardware. OctaTouch uses single-point
+and sequential gesture recognition on AD7879-equipped panels — multi-finger gestures are not available.
+
+---
+
+## Integration Checklist (from Section 4 of OctaTouch Spec)
+
+### 1 — Verify Resistive Panel Compatibility
+- Confirm 4-wire panel with resistance per-axis in **200 Ω – 2 kΩ** range.
+- Validate against AD7879 datasheet input voltage requirements **before** writing any firmware.
+
+### 2 — Confirm X/Y Wiring
+- Verify X+, X−, Y+, Y− lines match the AD7879 datasheet.
+- Incorrect wiring → mirrored/transposed coordinates; cannot be corrected in firmware without full recalibration.
+- Cross-check against the evaluation board reference schematic.
+
+### 3 — MCU Interface Requirements
+- One I²C or SPI interface at supported clock rates.
+- Two GPIO lines if passive-layer voltage measurements are needed (rotation detection).
+- Document chosen interface protocol in the integration manifest.
+
+### 4 — Firmware Configuration
+
+```c
+// integrations/firmware-ad7879/ad7879_config.h
+// Key registers to configure:
+// - Averaging filter: 4, 8, 16, or 32 samples (balance latency vs. noise)
+// - Median filter depth: match OctaTouch gesture engine polling rate
+// - Debounce threshold: suppress spurious events from panel flex / vehicle vibration
+```
+
+Rule of thumb for vehicle deployments: **32-sample average + debounce** — trades ~3 ms extra
+latency for dramatically reduced spurious event rate from road vibration.
+
+### 5 — Pre-Integration Verification
+
+```c
+// integrations/firmware-ad7879/ad7879_bist.c
+// Run the built-in self-test on first power-up and log to debug interface.
+```
+
+- Validate I²C/SPI transaction integrity with a **logic analyzer** before wiring to the gesture engine.
+- Confirm interrupt-driven delivery meets OctaTouch&apos;s **≤ 16 ms** latency budget (end-to-end from
+  touch event to `GestureResult` emitted).
+- Store calibration matrix coefficients in **non-volatile memory** for recovery after power cycles.
+
+---
+
+## File Map
+
+```
+integrations/firmware-ad7879/
+├── ad7879_config.h    → register map and filter configuration
+├── ad7879_driver.c    → I²C/SPI read loop, coordinate normalization
+└── ad7879_bist.c      → self-test routine
+```
+
+---
+
+## Escalation Path
+
+If interrupt latency exceeds 16 ms after tuning the averaging filter:
+1. Reduce averaging filter depth (accept more noise, less latency).
+2. Verify MCU clock is not throttled in vehicle low-power mode.
+3. Check for I²C clock stretching — switch to SPI if persistent.
+
+For gesture engine internals: `docs/agent-guides/gesture-engine-architecture.md`
+For in-vehicle safety context: `docs/agent-guides/in-vehicle-hmi.md`</file><file path="octatouch-sdk-core/docs/agent-guides/bootstrap.md"># Repo Bootstrap Guide
+
+1. Stabilize core types first.
+2. Keep adapters thin.
+3. Add one end-to-end demo per adapter.
+4. Add latency instrumentation before feature expansion.</file><file path="octatouch-sdk-core/docs/agent-guides/gesture-engine-architecture.md"># Gesture Engine Architecture
+
+&gt; Load this guide when: making changes to `core/`, adding gesture types, or debugging recognition failures.
+
+## The Assembly-Line Analogy
+
+Think of the pipeline like a car assembly line — each station does one job and passes the part forward:
+
+| Station | Component | Responsibility |
+|---------|-----------|----------------|
+| 1 — Parts Sorter | `FingerTracker` | Assign `FingerId` (L1–L4, R1–R4) to raw touch samples via spatial heuristics |
+| 2 — Pattern Inspector | `GestureRecognizer` | Map the active finger set to a `GestureType` |
+| 3 — Quality Control | `IntentResolver` | Apply safety gates, map `GestureType` → `GestureIntent`, emit `GestureResult` |
+
+**Analogy limit:** Unlike a real assembly line, the pipeline runs synchronously on every frame — there is no
+buffering between stages. Keep each stage&apos;s hot path under 1 ms.
+
+---
+
+## Stage 1: FingerTracker
+
+**Input:** `GestureInputFrame` (vector of `RawTouchSample`)
+**Output:** `std::map&lt;FingerId, RawTouchSample&gt;`
+
+Uses deterministic spatial heuristics (left/right half, vertical position) to assign stable `FingerId` labels
+across frames. This is not a biometric model — identity is positional, not biometric.
+
+**Key invariant:** A `FingerId` assigned on frame N must not switch to a different finger on frame N+1
+without a contact-lift event.
+
+---
+
+## Stage 2: GestureRecognizer
+
+**Input:** `std::map&lt;FingerId, RawTouchSample&gt;`
+**Output:** `GestureType`
+
+Recognition decision tree (current heuristics in `core/src/GestureRecognizer.cpp`):
+
+```
+fingers.size() == 0  → Unknown
+fingers.size() == 1  → LongPress | SwipeLeft/Right/Up/Down | Tap
+fingers.size() == 2  → TwoFingerTap
+fingers.size() == 3  → ThreeFingerPinchIn | ThreeFingerPinchOut | ThreeFingerSwipeLeft/Right | ThreeFingerTap
+fingers.size() &gt;= 8  → EightFingerSpread (other 8-finger types TBD)
+```
+
+**When adding a new GestureType:**
+1. Add the enum value to `Types.h`.
+2. Add the recognition branch to `GestureRecognizer::recognize()`.
+3. Add the intent mapping in `IntentResolver::mapPrimitiveToIntent()`.
+4. Update `docs/gesture-vocabulary.md` — this is the binding declaration.
+5. Add a unit test in `tests/unit/smoke_test.cpp`.
+
+---
+
+## Stage 3: IntentResolver
+
+**Input:** `GestureType`, `FingerSet`, `PlatformContext`, `timestamp_us`
+**Output:** `GestureResult`
+
+Two safety gates run before intent mapping (in this order):
+
+```cpp
+// Gate 1: Accessibility conflict
+if (isAccessibilityConflict(primitive, ctx))
+    return BlockedAccessibilityConflict;
+
+// Gate 2: Driving mode
+if (ctx.vehicleState == Driving &amp;&amp; isStationaryOnly(primitive))
+    return BlockedDrivingMode;
+
+// Safe — map to intent
+return mapPrimitiveToIntent(primitive);
+```
+
+**Rule:** `IntentResolver` is the **only** place in the codebase that should block or remap intents.
+Adapter code must never gate intents based on vehicle state or accessibility flags.
+
+---
+
+## Data Types Quick Reference
+
+```cpp
+struct GestureInputFrame {
+    std::vector&lt;RawTouchSample&gt; samples;
+    std::uint64_t capturedAt_us;
+};
+
+struct GestureResult {
+    GestureType type;
+    GestureIntent intent;
+    FingerSet activeFingers;
+    float confidence;           // 0.0 – 1.0
+    std::uint64_t resolvedAt_us;
+    std::string gestureName;
+};
+
+struct PlatformContext {
+    VehicleState vehicleState;
+    AccessibilityFlags accessibility;
+    CapabilityFlags capabilities;
+};
+```
+
+---
+
+## Latency Budget
+
+| Stage | Budget |
+|-------|--------|
+| FingerTracker | &lt; 0.5 ms |
+| GestureRecognizer | &lt; 0.5 ms |
+| IntentResolver | &lt; 0.1 ms |
+| **Total pipeline** | **≤ 1.0 ms** |
+| **Driving-safe event delivery** | **≤ 16 ms** (end-to-end from hardware interrupt) |
+
+Latency tests live in `tests/latency/`. Any regression is a **release blocker**.</file><file path="octatouch-sdk-core/docs/agent-guides/in-vehicle-hmi.md"># In-Vehicle HMI Integration Guide
+
+&gt; Load this guide when: working in `integrations/in-vehicle-hmi/`, designing automotive UX screens,
+&gt; or modifying the driving-mode gate in `IntentResolver`.
+
+## Safety-First Architecture Principle
+
+The in-vehicle integration uses a **deliberately asymmetric** design:
+
+| State | Available Gestures | Rationale |
+|-------|--------------------|-----------|
+| Driving | Single-tap, short swipe | Minimize eyes-off-road time |
+| Parked | Full OctaTouch gesture set | Safe to use rich interactions |
+
+This asymmetry is enforced **at the architecture level** in `IntentResolver::resolve()`, not through
+UI warnings alone. Never move safety gates into the adapter or UI layer.
+
+---
+
+## State Detection
+
+Vehicle state is determined by CAN bus signals:
+
+```cpp
+// integrations/in-vehicle-hmi/CANBusMonitor.cpp
+// Reads gear position + handbrake status → VehicleState
+VehicleState CANBusMonitor::poll() const;
+```
+
+The `DrivingModeGate` translates `CANBusMonitor` output into `PlatformContext.vehicleState`.
+All adapters must keep `PlatformContext.vehicleState` current on every frame.
+
+---
+
+## UI Screen Inventory (from spec)
+
+### Section 1.1 — Home Screen (Gesture Panel)
+Three regions:
+- **Region A (Header):** OctaTouch icon, mode pill (&quot;Driving&quot; | &quot;Parked&quot;)
+- **Region B (Cards):** Toggle basic gestures, audio feedback, clipboard access (parked only)
+- **Region C (Footer):** Safety notice + link to gesture rules
+
+### Section 1.2 — Gesture Rules Detail Screen
+- &quot;While Driving — Allowed&quot;: single-tap, short swipe
+- &quot;While Driving — Blocked&quot;: multi-finger, complex shortcuts
+- &quot;When Parked — Allowed&quot;: full gesture set, practice mode CTA
+
+### Section 1.3 — Gesture Practice Screen (Parked Only)
+State enforced at system level before screen renders.
+Three step-cards: Select Text → Save &amp; Copy → Undo &amp; Redo.
+
+### Section 1.4 — Toast Notifications
+- **Driving-Mode Restriction Toast:** auto-dismisses in 3 s, no modal
+- **Error Toast (gesture not recognized):** auto-dismisses in 3 s, logged to analytics
+
+---
+
+## OEM Integration Points
+
+| Setting | Where to configure |
+|---------|--------------------|
+| Toast display duration | `OctaTouch in-vehicle SDK configuration manifest` |
+| Fade animation timing | Manifest |
+| Audio trigger threshold | Manifest |
+| Localization strings | Externalized — all toast copy is i18n-ready |
+
+---
+
+## Analytics Pipeline
+All gesture errors, usage events, and state transitions are logged to the OctaTouch web controller.
+This telemetry supports gesture model refinement and OEM reporting dashboards.
+Logging is non-blocking — never wait on analytics in the hot path.
+
+---
+
+## AD7879 Resistive Hardware
+For panels using the AD7879 resistive touch controller, see `docs/agent-guides/ad7879-firmware.md`.
+Key constraint: interrupt-driven touch delivery must meet the **≤ 16 ms** latency budget.</file><file path="octatouch-sdk-core/docs/gesture-vocabulary.md"># Canonical Gesture Vocabulary
+
+This file is the binding declaration for gesture-to-intent mappings.
+
+- Single tap → Select / Confirm
+- Double tap → Select Word
+- Triple tap → Select Paragraph / Line
+- Long press + drag → Select Custom Block
+- Short swipe → Change Track / Page
+- Two-finger tap → Save Highlight
+- Three-finger pinch-in → Copy Selection
+- Three-finger pinch-out → Paste Clipboard
+- Three-finger swipe left → Undo
+- Three-finger swipe right → Redo
+- Three-finger tap → Open Clipboard / Zoom / Screen Curtain</file><file path="octatouch-sdk-core/integrations/firmware-ad7879/ad7879_bist.c"></file><file path="octatouch-sdk-core/integrations/firmware-ad7879/ad7879_config.h"></file><file path="octatouch-sdk-core/integrations/firmware-ad7879/ad7879_driver.c"></file><file path="octatouch-sdk-core/integrations/in-vehicle-hmi/CANBusMonitor.cpp"></file><file path="octatouch-sdk-core/integrations/in-vehicle-hmi/DrivingModeGate.cpp"></file><file path="octatouch-sdk-core/integrations/text-editor/TextSelectionPlugin.ts"></file><file path="octatouch-sdk-core/platforms/web/PointerEventAdapter.ts">export type ToolType = &apos;touch&apos; | &apos;stylus&apos; | &apos;mouse&apos;;
+export interface RawTouchSample {
+  x: number;
+  y: number;
+  pressure: number;
+  contactArea: number;
+  timestamp_us: number;
+  nativeId: number;
+}
+export interface GestureInputFrame {
+  timestamp_us: number;
+  samples: RawTouchSample[];
+  deviceId: string;
+  toolType: ToolType;
+  capabilities: {
+    multiTouch: boolean;
+    hover: boolean;
+    pressure: boolean;
+    stylus: boolean;
+  };
+}
+export type FrameSink = (frame: GestureInputFrame) =&gt; void;
+export class PointerEventAdapter
+⋮----
+constructor(private readonly element: HTMLElement, private readonly sink: FrameSink)
+attach(): void
+detach(): void
+⋮----
+private emit(event: PointerEvent): void
+private normalizeToolType(pointerType: string): ToolType</file><file path="octatouch-sdk-core/tests/integration/README.md"># Integration Tests
+
+Add adapter-specific translation tests here.</file><file path="octatouch-sdk-core/tests/latency/README.md"># Latency Tests
+
+Add target-specific benchmark harnesses here. Automotive targets should fail above 16 ms end-to-end delivery.</file><file path="octatouch-sdk-core/tests/unit/smoke_test.cpp">int main() {</file><file path="octatouch-sdk-core/.gitignore"># ── Build artifacts ──────────────────────────────────────────
+build/
+dist/
+out/
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.o
+*.obj
+
+# ── CMake generated ───────────────────────────────────────────
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# ── IDE &amp; editors ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates
+*.code-workspace
+
+# ── OS artefacts ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── Node (web adapter / tooling) ──────────────────────────────
+node_modules/
+*.tsbuildinfo
+
+# ── Secrets &amp; local env ───────────────────────────────────────
+.env
+.env.local
+*.pem
+secrets/</file><file path="octatouch-sdk-core/CLAUDE.md"># OctaTouch Repo Guide
+
+## Why
+OctaTouch standardizes gesture intent across operating systems, engines, and constrained hardware.
+
+## What
+This repo contains the platform-agnostic core, reference adapters, and integration surfaces.
+
+## How
+- Keep the canonical gesture vocabulary stable.
+- Do not silently remap gestures per platform.
+- Preserve the pipeline order: FingerTracker → GestureRecognizer → IntentResolver.
+- Prefer typed interfaces over ad hoc payloads.
+- Keep platform code limited to capture/translate/feed.
+- Gate restricted intents with accessibility and driving-state checks.
+- Treat latency regressions as release blockers.
+
+## Current bootstrap scope
+- Core headers and starter implementations
+- Web reference adapter
+- Placeholder integrations and tests
+
+## Rules
+- Public types live in `core/include/`.
+- Core logic stays free of platform APIs.
+- Add new adapters under `platforms/&lt;target&gt;/`.
+- Add deeper agent workflows under `.claude/skills/`.</file><file path="octatouch-sdk-core/CMakeLists.txt">cmake_minimum_required(VERSION 3.20)
+project(octatouch_sdk_core VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_library(octatouch_core
+    core/src/Types.cpp
+    core/src/FingerTracker.cpp
+    core/src/GestureRecognizer.cpp
+    core/src/IntentResolver.cpp
+    core/src/GestureEngine.cpp
+)
+
+target_include_directories(octatouch_core
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/include
+)
+
+target_compile_options(octatouch_core
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+
+add_executable(octatouch_smoke_test tests/unit/smoke_test.cpp)
+target_link_libraries(octatouch_smoke_test PRIVATE octatouch_core)</file><file path="octatouch-sdk-core/Makefile">BUILD_DIR := build
+
+.PHONY: init build test clean test-latency
+
+init:
+	@mkdir -p $(BUILD_DIR)
+
+build: init
+	@cmake -S . -B $(BUILD_DIR)
+	@cmake --build $(BUILD_DIR)
+
+test: build
+	@./$(BUILD_DIR)/octatouch_smoke_test
+
+test-latency:
+	@echo &quot;Latency harness scaffold only. Add target-specific benchmarks in tests/latency/.&quot;
+
+clean:
+	@rm -rf $(BUILD_DIR)</file><file path="octatouch-sdk-core/README.md"># OctaTouch Universal Gesture Engine
+
+Production-ready repository scaffold for a cross-platform gesture engine centered on eight stable finger channels, a deterministic core pipeline, platform adapters, and safety-aware intent resolution.
+
+## What is included
+
+- Core C++ interfaces and starter implementations
+- `GestureInputFrame` and `GestureResult` models
+- Deterministic pipeline: `FingerTracker` → `GestureRecognizer` → `IntentResolver`
+- Reference web adapter in TypeScript
+- Placeholder integration directories for automotive, text editor, and AD7879 firmware
+- Unit, integration, and latency test scaffolding
+
+## Repository layout
+
+```text
+octatouch-sdk-core/
+├── CLAUDE.md
+├── Makefile
+├── CMakeLists.txt
+├── README.md
+├── core/
+│   ├── include/
+│   └── src/
+├── platforms/
+│   └── web/
+├── integrations/
+├── docs/
+└── tests/
+```
+
+## Build
+
+```bash
+make init
+make build
+make test
+```
+
+## Notes
+
+This scaffold intentionally implements conservative defaults:
+
+- finger identity uses deterministic spatial heuristics, not a production biometric model yet
+- gesture recognition currently covers tap, double tap, long press, drag, swipe, and common 3-finger clipboard gestures
+- the reference adapter emits normalized frames and is suitable for browser integration prototyping
+- automotive and firmware folders are scaffolded, not production-complete drivers</file></files></repomix>
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & Test (Ubuntu)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build clang-tidy
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests
+        working-directory: build
+        run: ctest --output-on-failure
+
+      - name: Latency regression check
+        working-directory: build
+        # Any test labelled LATENCY that exceeds 16 ms exits non-zero → blocks merge
+        run: ctest -L LATENCY --output-on-failure
+
+  lint:
+    name: clang-format check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: |
+          find core/ platforms/ integrations/ tests/ \
+            -name "*.cpp" -o -name "*.h" -o -name "*.c" | \
+            xargs clang-format --dry-run --Werror
