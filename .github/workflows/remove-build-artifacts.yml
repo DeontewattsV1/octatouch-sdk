@@ -1,0 +1,42 @@
+name: Remove tracked build artifacts
+
+on:
+  push:
+    branches: [fix/ci-baseline]
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    if: github.repository == 'DeontewattsV1/octatouch-sdk'
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: fix/ci-baseline
+
+      - name: Remove tracked generated build tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files --error-unmatch build >/dev/null 2>&1 || git ls-files build | grep -q .; then
+            git rm -r build
+          else
+            echo "No tracked build artifacts remain."
+          fi
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "build: remove tracked CMake artifacts"
+          git push origin HEAD:fix/ci-baseline
