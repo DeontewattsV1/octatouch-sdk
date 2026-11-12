@@ -1,0 +1,4 @@
+/mnt/data/octatouch-sdk-core/build/CMakeFiles/octatouch_core.dir
+/mnt/data/octatouch-sdk-core/build/CMakeFiles/octatouch_smoke_test.dir
+/mnt/data/octatouch-sdk-core/build/CMakeFiles/edit_cache.dir
+/mnt/data/octatouch-sdk-core/build/CMakeFiles/rebuild_cache.dir
