@@ -5,16 +5,15 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  setup-clang:
+  install-clang:
     name: Install and verify Clang
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install Clang via action
-        uses: egor-tensin/setup-clang@v2.3
-        with:
-          version: '14'
-          cc: true
+      - name: Install Clang and tooling from Ubuntu repos
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y clang clang-tidy clang-format
       - name: Show clang version
         run: clang --version
